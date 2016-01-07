@@ -24,6 +24,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'active_model_serializers', git: 'https://github.com/rails-api/active_model_serializers.git'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
+# rails api framework
+gem 'rails-api', '~> 0.4'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
