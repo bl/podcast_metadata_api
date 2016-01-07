@@ -14,7 +14,27 @@ class User < ActiveRecord::Base
                        length: { minimum: 6 },
                        allow_nil: true
 
+  # verify authenticated user attribute
+  def authenticated?(attribute, token)
+    digest = self.send("#{attribute}_digest")
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
+  end
+
+  # generate base64 url-safe string
+  def User.new_token
+    SecureRandom.urlsafe_base64
+  end
+
+  # generate bcrypt digest from input string
+  def User.digest(input)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+                                                  BCrypt::Engine::cost
+    BCrypt::Password.create(input, cost: cost)
+  end
+
   private
+
     # downcase user email
     def downcase_email
       self.email.downcase!

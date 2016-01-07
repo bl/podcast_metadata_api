@@ -8,7 +8,7 @@
 /.bundle
 
 # ignore byebug log files
-/.bygebug_*
+/.byebug_*
 
 # Ignore the default SQLite database.
 /db/*.sqlite3
