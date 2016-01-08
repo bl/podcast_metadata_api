@@ -4,7 +4,7 @@ class PodcastTest < ActiveSupport::TestCase
   def setup
     @user = FactoryGirl.create :user
     @podcast = @user.podcasts.build(title: "New Games Podcast",
-                                    podcast_url: "http://www.magnac.com/sounds/edenlarge.mp3")
+                                    podcast_file: fixture_file_upload('podcasts/edenlarge.mp3', 'audio/mpeg'))
   end
 
   test "podcast should be valid" do
@@ -25,14 +25,13 @@ class PodcastTest < ActiveSupport::TestCase
     assert_not @podcast.valid?
   end
 
-  # podcast_url
+  # podcast_file
 
-  test "podcast_url should be present" do
-    @podcast.podcast_url = " "
+  test "podcast_url should be valid and provide audio file" do
+    @podcast.podcast_file = fixture_file_upload('images/rails.png', 'image/png')
     assert_not @podcast.valid?
+    assert_match /is not a valid audio file/, @podcast.errors[:podcast_file].to_s
   end
-
-  #TODO: podcast_url should be valid and provide audio file
 
   # user
 

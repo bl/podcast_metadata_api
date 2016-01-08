@@ -26,6 +26,10 @@ gem 'active_model_serializers', git: 'https://github.com/rails-api/active_model_
 gem 'bcrypt', '~> 3.1.7'
 # rails api framework
 gem 'rails-api', '~> 0.4'
+# used for reading audio file metadata tags
+gem 'taglib-ruby'
+# Carrierwave used for uploading podcast audio data
+gem 'carrierwave'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

@@ -88,7 +88,4 @@ class UserTest < ActiveSupport::TestCase
     @user.password = @user.password_confirmation = "123456"
     assert @user.valid?
   end
-
-  #test "valid password should be authenticated" do
-  #end
 end

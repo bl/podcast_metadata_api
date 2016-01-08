@@ -2,8 +2,9 @@ class CreatePodcasts < ActiveRecord::Migration
   def change
     create_table :podcasts do |t|
       t.string :title
-      t.string :podcast_url
+      t.string :podcast_file
       t.integer :end_time
+      t.integer :bitrate
       t.boolean :published, default: false
       t.references :user, index: true, foreign_key: true
 

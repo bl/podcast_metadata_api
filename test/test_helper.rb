@@ -6,6 +6,8 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
+  include ActionDispatch::TestProcess
+
   def api_authorization_header(token)
     request.headers['Authorization'] = token
   end

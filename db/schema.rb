@@ -15,12 +15,13 @@ ActiveRecord::Schema.define(version: 20160108165814) do
 
   create_table "podcasts", force: :cascade do |t|
     t.string   "title"
-    t.string   "podcast_url"
+    t.string   "podcast_file"
     t.integer  "end_time"
-    t.boolean  "published",   default: false
+    t.integer  "bitrate"
+    t.boolean  "published",    default: false
     t.integer  "user_id"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
   end
 
   add_index "podcasts", ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
