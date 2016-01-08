@@ -11,7 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160108045324) do
+ActiveRecord::Schema.define(version: 20160108165814) do
+
+  create_table "podcasts", force: :cascade do |t|
+    t.string   "title"
+    t.string   "podcast_url"
+    t.integer  "end_time"
+    t.boolean  "published",   default: false
+    t.integer  "user_id"
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+  end
+
+  add_index "podcasts", ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
+  add_index "podcasts", ["title"], name: "index_podcasts_on_title"
+  add_index "podcasts", ["user_id"], name: "index_podcasts_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"

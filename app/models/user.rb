@@ -4,6 +4,8 @@ class User < ActiveRecord::Base
   #   allows for making API calls right after creation without needing to log-in
   before_create :create_auth_token
 
+  has_many :podcasts
+
   # valid email regex
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
   validates :name, presence: true,
