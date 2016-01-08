@@ -8,6 +8,7 @@ class V1::UsersControllerTest < ActionController::TestCase
       FactoryGirl.create :user
     end
     @user = FactoryGirl.create :user
+    @other_user = FactoryGirl.create :user
     include_default_accept_headers
   end
 
@@ -64,18 +65,41 @@ class V1::UsersControllerTest < ActionController::TestCase
 
   # UPDATE
 
+  test "update should return authorization error when not logged in" do
+    update_user_attributes = { name: "New Name" }
+    post :update, id: @user, user: update_user_attributes
+    user_errors = json_response[:errors]
+    assert_not_nil user_errors
+    assert_match /Not authenticated/, user_errors.to_s
+    
+    assert_response :unauthorized
+  end
+
   test "should return json errors on invalid user id" do
     update_user_attributes = { email: "new_email@example.com" }
+    log_in_as @user
     post :update, id: -1, user: update_user_attributes
     user_errors = json_response[:errors]
     assert_not_nil user_errors
-    assert_match /Invalid user/, json_response.to_s
+    assert_match /Invalid user/, user_errors.to_s
+    
+    assert_response 403
+  end
+
+  test "should return json errors on other user id update" do
+    update_user_attributes = { email: "new_email@example.com" }
+    log_in_as @user
+    post :update, id: @other_user, user: update_user_attributes
+    user_errors = json_response[:errors]
+    assert_not_nil user_errors
+    assert_match /Invalid user/, user_errors.to_s
     
     assert_response 403
   end
 
   test "should return valid json on valid user update" do
     update_user_attributes = { name: "New Name", email: "new_email@example.com" }
+    log_in_as @user
     post :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
     assert_not_nil user_response
@@ -89,6 +113,7 @@ class V1::UsersControllerTest < ActionController::TestCase
 
   test "should return valid json on valid user password update" do
     new_password = "123456"
+    log_in_as @user
     update_user_attributes = { password: new_password, password_confirmation: new_password }
     post :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
@@ -102,18 +127,43 @@ class V1::UsersControllerTest < ActionController::TestCase
 
   # DESTROY
 
+  test "destroy should return authorization error when not logged in" do
+    assert_no_difference 'User.count' do
+      delete :destroy, id: @user
+    end
+    user_errors = json_response[:errors]
+    assert_not_nil user_errors
+    assert_match /Not authenticated/, user_errors.to_s
+    
+    assert_response :unauthorized
+  end
+
   test "should return json errors on invalid user id destroy" do
+    log_in_as @user
     assert_no_difference 'User.count' do
       delete :destroy, id: -1
     end
     user_errors = json_response[:errors]
     assert_not_nil user_errors
-    assert_match /Invalid user/, json_response.to_s
+    assert_match /Invalid user/, user_errors.to_s
     
     assert_response 403
   end
 
+  test "should return json errors on other user id destroy" do
+    log_in_as @user
+    assert_no_difference 'User.count' do
+      delete :destroy, id: @other_user
+    end
+    user_errors = json_response[:errors]
+    assert_not_nil user_errors
+    assert_match /Invalid user/, user_errors.to_s
+    
+    assert_response 403
+  end
+  
   test "should return empty payload on valid user destroy" do
+    log_in_as @user
     assert_difference 'User.count', -1 do
       delete :destroy, id: @user
     end

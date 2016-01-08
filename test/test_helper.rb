@@ -24,8 +24,8 @@ class ActiveSupport::TestCase
   end
 
   # log in as user by creating session for user, then setting authorization header
-  def log_in_as
-    api_authorization_header get_session_for(user, options)
+  def log_in_as(user, options = {})
+    api_authorization_header create_session_for(user, options)
   end
 
   # return json from response body
