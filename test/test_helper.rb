@@ -6,6 +6,29 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
+  def api_authorization_header(token)
+    request.headers['Authorization'] = token
+  end
+
+  def create_session_for(user, options = {})
+    password = options[:password] || 'password'
+    if integration_test?
+      create sessions_path, session: { email:    user.email,
+                                       password: password }
+      json_response[:auth_token]
+    else
+      user.create_auth_token
+      user.save
+      user.auth_token
+    end
+  end
+
+  # log in as user by creating session for user, then setting authorization header
+  def log_in_as
+    api_authorization_header get_session_for(user, options)
+  end
+
+  # return json from response body
   def json_response
     JSON.parse response.body, symbolize_names: true
   end
@@ -27,4 +50,10 @@ class ActiveSupport::TestCase
     api_header
     api_response_format
   end
+
+  private
+
+    def integration_test?
+      defined? post_via_redirect
+    end
 end

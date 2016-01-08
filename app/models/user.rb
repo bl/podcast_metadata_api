@@ -1,5 +1,8 @@
 class User < ActiveRecord::Base
-  before_save :downcase_email
+  before_save   :downcase_email
+  # create auth_token on user create
+  #   allows for making API calls right after creation without needing to log-in
+  before_create :create_auth_token
 
   # valid email regex
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
@@ -13,6 +16,16 @@ class User < ActiveRecord::Base
   validates :password, presence: true,
                        length: { minimum: 6 },
                        allow_nil: true
+
+  def create_auth_token
+    begin
+      self.auth_token = User.new_token
+    end while self.class.exists?(auth_token: self.auth_token)
+  end
+
+  def clear_auth_token
+    self.auth_token = nil
+  end
 
   # verify authenticated user attribute
   def authenticated?(attribute, token)
