@@ -8,6 +8,10 @@ class ActiveSupport::TestCase
 
   include ActionDispatch::TestProcess
 
+  def open_podcast_file(file_name)
+   fixture_file_upload("podcasts/#{file_name}", 'audio/') 
+  end
+
   def api_authorization_header(token)
     request.headers['Authorization'] = token
   end

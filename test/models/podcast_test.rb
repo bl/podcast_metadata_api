@@ -7,6 +7,7 @@ class PodcastTest < ActiveSupport::TestCase
                                     podcast_file: fixture_file_upload('podcasts/edenlarge.mp3', 'audio/mpeg'))
   end
 
+  # verify podcast metadata properly initialized
   test "podcast should be valid" do
     assert @podcast.valid?
   end
@@ -47,6 +48,4 @@ class PodcastTest < ActiveSupport::TestCase
   end
 
   # end_time
-
-  #TODO: end_time should be generated on create
 end

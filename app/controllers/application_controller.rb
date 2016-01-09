@@ -21,10 +21,4 @@ class ApplicationController < ActionController::Base
       render json: {errors: "Not authenticated" },
              status: :unauthorized unless logged_in?
     end
-
-    def correct_user
-      @user ||= User.find_by id: params[:id]
-      render json: { errors: "Invalid user" },
-             status: 403 unless !@user.nil? && current_user?(@user)
-    end
 end

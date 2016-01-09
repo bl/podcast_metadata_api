@@ -9,6 +9,7 @@ class V1::UsersControllerTest < ActionController::TestCase
     end
     @user = FactoryGirl.create :user
     @other_user = FactoryGirl.create :user
+    @user_with_podcasts = FactoryGirl.create :user_with_podcasts
     include_default_accept_headers
   end
 
@@ -21,6 +22,15 @@ class V1::UsersControllerTest < ActionController::TestCase
     assert @user.id, user_response[:attributes][:id]
     
     assert_response 200
+  end
+
+  test "should return user json and podcasts relationship on valid user get" do
+    get :show, id: @user_with_podcasts
+    user_response = json_response[:data]
+    assert_not_nil user_response
+    user_podcasts_response = user_response[:relationships][:podcasts][:data]
+    assert_not_nil user_podcasts_response
+    assert_equal @user_with_podcasts.podcasts.count, user_podcasts_response.count
   end
 
   # INDEX
@@ -60,7 +70,7 @@ class V1::UsersControllerTest < ActionController::TestCase
     assert_not_nil user_response
     assert_equal valid_user_attributes[:email], user_response[:attributes][:email]
     
-    assert_response 200
+    assert_response 201
   end
 
   # UPDATE

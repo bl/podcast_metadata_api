@@ -15,16 +15,13 @@ class V1::UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      render json: @user, status: 200
+      render json: @user, status: 201
     else
       render json: { errors: @user.errors }, status: 422
     end
   end
 
   def update
-    @user = User.find_by id: params[:id]
-    render json: { errors: "Invalid user" }, status: 403 and return if @user.nil?
-
     if @user.update(user_params)
       render json: @user, status: 200
     else
@@ -33,9 +30,6 @@ class V1::UsersController < ApplicationController
   end
 
   def destroy
-    @user = User.find_by id: params[:id]
-    render json: { errors: "Invalid user" }, status: 403 and return if @user.nil?
-
     @user.destroy
     head 204
   end
@@ -44,5 +38,11 @@ class V1::UsersController < ApplicationController
 
     def user_params
       params.require(:user).permit(:name, :email, :password, :password_confirmation)
+    end
+
+    def correct_user
+      @user ||= User.find_by id: params[:id]
+      render json: { errors: "Invalid user" },
+             status: 403 unless !@user.nil? && current_user?(@user)
     end
 end
