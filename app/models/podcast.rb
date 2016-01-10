@@ -4,6 +4,7 @@ class Podcast < ActiveRecord::Base
   before_validation :initialize_metadata
 
   belongs_to :user
+  has_many :timestamps
 
   mount_uploader :podcast_file, PodcastFileUploader
 
@@ -13,8 +14,10 @@ class Podcast < ActiveRecord::Base
   # possibly redundant presence check
   validates :podcast_file,  presence: true
   validates :user_id,       presence: true
-  validates :end_time,      presence: true
-  validates :bitrate,       presence: true
+  validates :end_time,      presence: true, 
+                            numericality: { gerater_than_or_equal_to: 0 }
+  validates :bitrate,       presence: true,
+                            numericality: { gerater_than_or_equal_to: 0 }
 
   private
     

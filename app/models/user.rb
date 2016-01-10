@@ -18,6 +18,7 @@ class User < ActiveRecord::Base
   validates :password, presence: true,
                        length: { minimum: 6 },
                        allow_nil: true
+  validates :auth_token,  uniqueness: true
 
   def create_auth_token
     begin
