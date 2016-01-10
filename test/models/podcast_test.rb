@@ -47,5 +47,26 @@ class PodcastTest < ActiveSupport::TestCase
     assert_not @podcast.published
   end
 
+
+  # TODO: implement method of bypassing podcast metadata initialization before validation
   # end_time
+
+#  test "end_time must be present" do
+#    @podcast.end_time = nil
+#    assert_not @podcast.valid?
+#  end
+
+#  test "end_time must be greater than or equal to 5 seconds" do
+#    @podcast.end_time = 4
+#    assert_not @podcast.valid?
+#    @podcast.end_time = 5
+#    assert @podcast.valid?
+#  end
+
+  # bitrate
+
+#  test "bitrate must be present" do
+#    @podcast.bitrate = nil
+#    assert_not @podcast.valid?
+#  end
 end

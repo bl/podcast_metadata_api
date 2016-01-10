@@ -15,7 +15,7 @@ class Podcast < ActiveRecord::Base
   validates :podcast_file,  presence: true
   validates :user_id,       presence: true
   validates :end_time,      presence: true, 
-                            numericality: { gerater_than_or_equal_to: 0 }
+                            numericality: { gerater_than_or_equal_to: 5 }
   validates :bitrate,       presence: true,
                             numericality: { gerater_than_or_equal_to: 0 }
 
