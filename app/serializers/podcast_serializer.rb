@@ -3,4 +3,5 @@ class PodcastSerializer < ActiveModel::Serializer
   attribute :podcast_file_url, key: :podcast_file
 
   belongs_to :user
+  has_many :timestamps
 end

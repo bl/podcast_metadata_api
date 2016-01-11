@@ -10,6 +10,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     @user = FactoryGirl.create :user
     @user_with_podcasts = FactoryGirl.create :user_with_podcasts
     @podcasts = @user_with_podcasts.podcasts
+    include_default_accept_headers
   end
 
   # SHOW
@@ -34,7 +35,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
 
   # INDEX
 
-  test "index should return valid json on all users" do
+  test "index should return valid json on all podcasts" do
     get :index
     podcasts_response = json_response[:data]
     assert_not_nil podcasts_response

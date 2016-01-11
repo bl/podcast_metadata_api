@@ -8,13 +8,13 @@ FactoryGirl.define do
     podcast_file { fixture_file_upload("test/fixtures/podcasts/#{podcast_file_name}", 'audio/mpeg') }
     user
 
-    factory :podcasts_with_timestamps do
+    factory :podcast_with_timestamps do
       transient do
         timestamps_count 3
       end
 
       after(:create) do |podcast, elevator|
-        create_list(:timestamp, elevator_timestamps_count, podcast: podcast)
+        create_list(:timestamp, elevator.timestamps_count, podcast: podcast, podcast_end_time: podcast.end_time)
       end
     end
   end
