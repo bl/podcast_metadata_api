@@ -1,7 +1,8 @@
 class V1::TimestampsController < ApplicationController
-  before_action :logged_in_user,  only: [:create]
-  before_action :correct_user,    only: [:create]
-  before_action :correct_podcast, only: [:create]
+  before_action :logged_in_user,    only: [:create, :update]
+  before_action :correct_user,      only: [:create, :update]
+  before_action :correct_podcast,   only: [:create, :update]
+  before_action :correct_timestamp, only: [:update]
 
   def show
     @timestamp = Timestamp.find_by id: params[:id]
@@ -24,6 +25,14 @@ class V1::TimestampsController < ApplicationController
     end
   end
 
+  def update
+    if @timestamp.update(timestamp_params)
+      render json: @timestamp, status: 200
+    else
+      render json: { errors: @timestamp.errors }, status: 422
+    end
+  end
+
   private
 
     def correct_user
@@ -31,9 +40,9 @@ class V1::TimestampsController < ApplicationController
              status: 403 unless logged_in?
     end
 
-    def correct_podcast
-      @podcast ||= current_user.podcasts.find_by id: params[:podcast_id]
-      render json: { errors: "Invalid podcast" }, status: 403 unless @podcast
+    def correct_timestamp
+      @timestamp ||= @podcast.timestamps.find_by id: params[:id]
+      render json: { errors: "Invalid timestamp" }, status: 403 unless @timestamp
     end
     
     def timestamp_params

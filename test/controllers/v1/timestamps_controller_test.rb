@@ -57,7 +57,7 @@ class V1::TimestampsControllerTest < ActionController::TestCase
     assert_response :unauthorized
   end
 
-  test "create should return json errors on non-logged in user" do
+  test "create should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 5, end_time: 10 }
     log_in_as @podcast_with_timestamps.user
     assert_no_difference '@podcast.timestamps.count' do
@@ -70,7 +70,7 @@ class V1::TimestampsControllerTest < ActionController::TestCase
     assert_response 403
   end
 
-  test "create should return json errors on invalid attribtue" do
+  test "create should return json errors on invalid attribtues" do
     invalid_timestamp_attributes = { start_time: 10, end_time: 5 }
     log_in_as @podcast.user
     assert_no_difference '@podcast.timestamps.count' do
@@ -94,5 +94,51 @@ class V1::TimestampsControllerTest < ActionController::TestCase
     assert_equal @podcast.timestamps.first.id, timestamp_response[:id].to_i
 
     assert_response 201
+  end
+
+  # UPDATE
+
+  test "update should return json errors when not logged in" do
+    valid_timestamp_attributes = { start_time: 10, end_time: nil }
+    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /Not authenticated/, timestamp_errors
+
+    assert_response :unauthorized
+  end
+
+  test "update should return json errors on non-logged in users podcast" do
+    valid_timestamp_attributes = { start_time: 10, end_time: nil }
+    log_in_as @podcast.user
+    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /Invalid podcast/, timestamp_errors
+
+    assert_response 403
+  end
+
+  test "update should return json errors on invalid attributes" do
+    invalid_timestamp_attributes = { start_time: @podcast_with_timestamps.end_time, end_time: nil }
+    log_in_as @podcast_with_timestamps.user
+    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: invalid_timestamp_attributes
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /must be within podcast length/, timestamp_errors[:start_time].to_s
+
+    assert_response 422
+  end
+
+  test "update should return valid json on valid attributes" do
+    valid_timestamp_attributes = { start_time: 10, end_time: nil }
+    log_in_as @podcast_with_timestamps.user
+    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    timestamp_response = json_response[:data]
+    assert_not_nil timestamp_response
+    assert_equal valid_timestamp_attributes[:end_time], @timestamps.reload.first.end_time
+    assert_equal valid_timestamp_attributes[:end_time], timestamp_response[:attributes][:end_time]
+
+    assert_response 200
   end
 end
