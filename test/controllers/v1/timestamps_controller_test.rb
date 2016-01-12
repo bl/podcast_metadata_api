@@ -100,7 +100,7 @@ class V1::TimestampsControllerTest < ActionController::TestCase
 
   test "update should return json errors when not logged in" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    post :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
     timestamp_errors = json_response[:errors]
     assert_not_nil timestamp_errors
     assert_match /Not authenticated/, timestamp_errors
@@ -111,10 +111,10 @@ class V1::TimestampsControllerTest < ActionController::TestCase
   test "update should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
     log_in_as @podcast.user
-    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    post :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
     timestamp_errors = json_response[:errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid podcast/, timestamp_errors
+    assert_match /Invalid timestamp/, timestamp_errors
 
     assert_response 403
   end
@@ -122,7 +122,7 @@ class V1::TimestampsControllerTest < ActionController::TestCase
   test "update should return json errors on invalid attributes" do
     invalid_timestamp_attributes = { start_time: @podcast_with_timestamps.end_time, end_time: nil }
     log_in_as @podcast_with_timestamps.user
-    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: invalid_timestamp_attributes
+    post :update, id: @timestamps.first, timestamp: invalid_timestamp_attributes
     timestamp_errors = json_response[:errors]
     assert_not_nil timestamp_errors
     assert_match /must be within podcast length/, timestamp_errors[:start_time].to_s
@@ -133,12 +133,59 @@ class V1::TimestampsControllerTest < ActionController::TestCase
   test "update should return valid json on valid attributes" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
     log_in_as @podcast_with_timestamps.user
-    post :update, podcast_id: @podcast_with_timestamps, id: @timestamps.first, timestamp: valid_timestamp_attributes
+    post :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
     assert_equal valid_timestamp_attributes[:end_time], @timestamps.reload.first.end_time
     assert_equal valid_timestamp_attributes[:end_time], timestamp_response[:attributes][:end_time]
 
     assert_response 200
+  end
+
+  # DESTROY
+  
+  test "destroy should return authorization error when not logged in" do
+    assert_no_difference '@timestamps.count' do
+      delete :destroy, id: @timestamps.first
+    end
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /Not authenticated/, timestamp_errors
+
+    assert_response :unauthorized
+  end
+
+  test "destroy should return json errors on invalid timestamp id" do
+    log_in_as @podcast_with_timestamps.user
+    assert_no_difference '@timestamps.count' do
+      delete :destroy, id: -1
+    end
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /Invalid timestamp/, timestamp_errors
+
+    assert_response 403
+  end
+
+  test "destroy should return json errors on non-logged in user podcasts timestamp" do
+    log_in_as @podcast.user
+    assert_no_difference '@timestamps.count' do
+      delete :destroy, id: @timestamps.first
+    end
+    timestamp_errors = json_response[:errors]
+    assert_not_nil timestamp_errors
+    assert_match /Invalid timestamp/, timestamp_errors
+
+    assert_response 403
+  end
+
+  test "destroy should return empty payload on valid timestamp destroy" do
+    log_in_as @podcast_with_timestamps.user
+    assert_difference '@timestamps.count', -1 do
+      delete :destroy, id: @timestamps.first
+    end
+    assert_empty response.body
+
+    assert_response 204
   end
 end
