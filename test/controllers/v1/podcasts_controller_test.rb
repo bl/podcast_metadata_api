@@ -109,6 +109,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
+    assert_equal @user.podcasts.first.id, podcast_response[:id].to_i
 
     assert_response 201
   end

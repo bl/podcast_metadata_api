@@ -8,7 +8,9 @@ Rails.application.routes.draw do
       resources :podcasts,    only: [:create, :update, :destroy]
     end
     resources :sessions,    only: [:create, :destroy]
-    resources :podcasts,    only: [:show, :index]
+    resources :podcasts,    only: [:show, :index] do
+      resources :timestamps,  only: [:create]
+    end
     resources :timestamps,  only: [:show, :index]
   end
 end
