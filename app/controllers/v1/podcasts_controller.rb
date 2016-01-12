@@ -16,7 +16,7 @@ class V1::PodcastsController < ApplicationController
   end
 
   def create
-    @podcast = @user.podcasts.build(podcast_params)
+    @podcast = current_user.podcasts.build(podcast_params)
     if @podcast.save
       render json: @podcast, status: 201
     else
@@ -43,15 +43,8 @@ class V1::PodcastsController < ApplicationController
       params.require(:podcast).permit(:title, :podcast_file, :remote_podcast_file_url)
     end
 
-    #TODO: refactor with nearly duplicate users_controller.correct_user
-    def correct_user
-      @user ||= User.find_by id: params[:user_id]
-      render json: { errors: "Invalid user" },
-             status: 403 unless !@user.nil? && current_user?(@user)
-    end
-
     def correct_podcast
-      @podcast ||= @user.podcasts.find_by id: params[:id]
+      @podcast ||= current_user.podcasts.find_by id: params[:id]
       render json: { errors: "Invalid podcast" }, status: 403 unless @podcast
     end
 end

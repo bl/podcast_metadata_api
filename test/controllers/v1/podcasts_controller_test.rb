@@ -50,7 +50,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
     assert_no_difference '@user.podcasts.count' do
-      post :create, user_id: @user, podcast: valid_podcast_attributes
+      post :create, podcast: valid_podcast_attributes
     end
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
@@ -59,18 +59,19 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     assert_response :unauthorized
   end
 
-  test "should return json errors on create for non-logged in user" do
+  test "should only add podcast to logged in users podcasts" do
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
     log_in_as @user
+    before_create_count = @user.podcasts.count
     assert_no_difference '@user_with_podcasts.podcasts.count' do
-      post :create, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+      post :create, podcast: valid_podcast_attributes
     end
-    podcast_errors = json_response[:errors]
-    assert_not_nil podcast_errors
-    assert_match /Invalid user/, podcast_errors
+    podcast_response = json_response[:data]
+    assert_not_nil podcast_response
+    assert_equal before_create_count+1, @user.reload.podcasts.count
 
-    assert_response 403
+    assert_response 201
   end
 
   test "create should return errors on invalid attribute" do
@@ -78,7 +79,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
                                    podcast_file: "invalid_file" }
     log_in_as @user
     assert_no_difference '@user.podcasts.count' do
-      post :create, user_id: @user, podcast: invalid_podcast_attributes
+      post :create, podcast: invalid_podcast_attributes
     end
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
@@ -92,7 +93,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
     log_in_as @user
     assert_difference '@user.podcasts.count', 1 do
-      post :create, user_id: @user, podcast: valid_podcast_attributes
+      post :create, podcast: valid_podcast_attributes
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -105,7 +106,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
                                  remote_podcast_file_url: "http://www.magnac.com/sounds/edensmall.mp3" }
     log_in_as @user
     assert_difference '@user.podcasts.count', 1 do
-      post :create, user_id: @user, podcast: valid_podcast_attributes
+      post :create, podcast: valid_podcast_attributes
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -118,7 +119,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
 
   test "update should return json errors when not logged-in" do
     valid_podcast_attributes = { title: "new title" }
-    post :update, id: @podcasts.first, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /Not authenticated/, podcast_errors
@@ -129,21 +130,10 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "should return json errors when updating non-logged-in users podcast" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user
-    post :update, id: @podcasts.first, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid user/, podcast_errors
-    
-    assert_response 403
-  end
-
-  test "update should return json errors when using invalid user_id" do
-    valid_podcast_attributes = { title: "new title" }
-    log_in_as @user_with_podcasts
-    post :update, id: @podcasts.first, user_id: -1, podcast: valid_podcast_attributes
-    podcast_errors = json_response[:errors]
-    assert_not_nil podcast_errors
-    assert_match /Invalid user/, podcast_errors
+    assert_match /Invalid podcast/, podcast_errors
     
     assert_response 403
   end
@@ -151,7 +141,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return json errors when using invalid podcast id" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user_with_podcasts
-    post :update, id: -1, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+    post :update, id: -1, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /Invalid podcast/, podcast_errors
@@ -162,7 +152,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return json errors on invalid attributes" do
     valid_podcast_attributes = { title: " " }
     log_in_as @user_with_podcasts
-    post :update, id: @podcasts.first, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /can't be blank/, podcast_errors[:title].to_s
@@ -173,7 +163,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return valid json on valid attributes" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user_with_podcasts
-    post :update, id: @podcasts.first, user_id: @user_with_podcasts, podcast: valid_podcast_attributes
+    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
     assert_equal valid_podcast_attributes[:title], @podcasts.first.reload.title
@@ -186,7 +176,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
 
   test "should return authorization error when not logged in" do
     assert_no_difference '@podcasts.count' do
-      delete :destroy, id: @podcasts.first, user_id: @user_with_podcasts
+      delete :destroy, id: @podcasts.first
     end
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
@@ -195,22 +185,10 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     assert_response :unauthorized
   end
 
-  test "should return json errors on invalid user id podcast destroy" do
-    log_in_as @user_with_podcasts
-    assert_no_difference '@podcasts.count' do
-      delete :destroy, id: @podcasts.first, user_id: -1
-    end
-    podcast_errors = json_response[:errors]
-    assert_not_nil podcast_errors
-    assert_match /Invalid user/, podcast_errors
-  
-    assert_response 403
-  end
-
   test "should return json errors on invalid podcast id podcast destroy" do
     log_in_as @user_with_podcasts
     assert_no_difference '@podcasts.count' do
-      delete :destroy, id: -1, user_id: @user_with_podcasts
+      delete :destroy, id: -1
     end
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
@@ -222,11 +200,11 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "should return json errors on deleting non-logged in users podcast" do
     log_in_as @user
     assert_no_difference '@podcasts.count' do
-      delete :destroy, id: @podcasts.first, user_id: @user_with_podcasts
+      delete :destroy, id: @podcasts.first
     end
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid user/, podcast_errors
+    assert_match /Invalid podcast/, podcast_errors
   
     assert_response 403
   end
@@ -234,7 +212,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "should return empty payload on valid podcast destroy" do
     log_in_as @user_with_podcasts
     assert_difference '@podcasts.count', -1 do
-      delete :destroy, id: @podcasts.first, user_id: @user_with_podcasts
+      delete :destroy, id: @podcasts.first
     end
     assert_empty response.body
 

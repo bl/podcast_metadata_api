@@ -22,6 +22,7 @@ class V1::UsersController < ApplicationController
   end
 
   def update
+    @user = current_user
     if @user.update(user_params)
       render json: @user, status: 200
     else
@@ -30,7 +31,7 @@ class V1::UsersController < ApplicationController
   end
 
   def destroy
-    @user.destroy
+    current_user.destroy if logged_in?
     head 204
   end
 
@@ -41,8 +42,8 @@ class V1::UsersController < ApplicationController
     end
 
     def correct_user
-      @user ||= User.find_by id: params[:id]
+      user ||= User.find_by id: params[:id]
       render json: { errors: "Invalid user" },
-             status: 403 unless !@user.nil? && current_user?(@user)
+             status: 403 unless current_user?(user)
     end
 end
