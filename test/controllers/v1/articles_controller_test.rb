@@ -89,7 +89,65 @@ class V1::ArticlesControllerTest < ActionController::TestCase
     end
     article_response = json_response[:data]
     assert_not_nil article_response
+    assert_equal @user.reload.articles.first.id, article_response[:id].to_i
 
     assert_response 201
+  end
+
+  # UPDATE
+
+  test "update should return json errors when nog logged-in" do
+    valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
+    post :update, id: @articles.first, article: valid_article_attributes
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Not authenticated/, article_errors
+
+    assert_response :unauthorized
+  end
+
+  test "should return json errors when updating non-logged users article" do
+    valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
+    log_in_as @user
+    post :update, id: @articles.first, article: valid_article_attributes
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Invalid article/, article_errors
+
+    assert_response 403
+  end
+
+  test "update should return json errors when using invalid podcast id" do
+    valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
+    log_in_as @user_with_articles
+    post :update, id: -1, article: valid_article_attributes
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Invalid article/, article_errors
+
+    assert_response 403
+  end
+
+  test "update should return json errors on invalid attributes" do
+    invalid_article_attributes = { content: " " }
+    log_in_as @user_with_articles
+    post :update, id: @articles.first, article: invalid_article_attributes
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /can't be blank/, article_errors[:content].to_s
+
+    assert_response 422
+  end
+
+  test "update should return valid json on valid attributes" do
+    valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
+    log_in_as @user_with_articles
+    post :update, id: @articles.first, article: valid_article_attributes
+    article_response = json_response[:data]
+    assert_not_nil article_response
+    assert_equal valid_article_attributes[:content], @articles.first.reload.content 
+    assert_equal valid_article_attributes[:content], article_response[:attributes][:content]
+
+    assert_response 200
   end
 end
