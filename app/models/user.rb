@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   before_create :create_auth_token
 
   has_many :podcasts
+  has_many :articles, foreign_key: 'author_id'
 
   # valid email regex
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
