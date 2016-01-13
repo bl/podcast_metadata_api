@@ -17,11 +17,6 @@ class ApplicationController < ActionController::Base
 
   private
 
-    def correct_user
-      render json: { errors: "Invalid user" },
-             status: 403 unless logged_in?
-    end
-
     def correct_podcast
       @podcast ||= current_user.podcasts.find_by id: params[:podcast_id]
       render json: { errors: "Invalid podcast" }, status: 403 unless @podcast
