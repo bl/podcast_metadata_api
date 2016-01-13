@@ -150,4 +150,51 @@ class V1::ArticlesControllerTest < ActionController::TestCase
 
     assert_response 200
   end
+
+  # DESTROY
+
+  test "destroy should return authorization error when not logged in" do
+    assert_no_difference '@articles.count' do
+      delete :destroy, id: @articles.first
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Not authenticated/, article_errors
+
+    assert_response :unauthorized
+  end
+
+  test "destroy should return json errors on invalid podcast id" do
+    log_in_as @user_with_articles
+    assert_no_difference '@articles.count' do
+      delete :destroy, id: -1
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Invalid article/, article_errors
+
+    assert_response 403
+  end
+
+  test "destroy should return json errors on deleting non-logged in users article" do
+    log_in_as @user
+    assert_no_difference '@articles.count' do
+      delete :destroy, id: @articles.first
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /Invalid article/, article_errors
+
+    assert_response 403
+  end
+
+  test "destroy should return empty payload on valid article" do
+    log_in_as @user_with_articles
+    assert_difference '@articles.count', -1 do
+      delete :destroy, id: @articles.first
+    end
+    assert_empty response.body
+
+    assert_response 204
+  end
 end

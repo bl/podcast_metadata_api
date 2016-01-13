@@ -1,6 +1,6 @@
 class V1::ArticlesController < ApplicationController
-  before_action :logged_in_user,  only: [:create, :update]
-  before_action :correct_article, only: [:update]
+  before_action :logged_in_user,  only: [:create, :update, :destroy]
+  before_action :correct_article, only: [:update, :destroy]
 
   def show
     @article = Article.find_by id: params[:id]
@@ -29,6 +29,11 @@ class V1::ArticlesController < ApplicationController
     else
       render json: { errors: @article.errors }, status: 422
     end
+  end
+
+  def destroy
+    @article.destroy
+    head 204
   end
 
   private
