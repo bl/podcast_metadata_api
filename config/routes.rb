@@ -10,6 +10,6 @@ Rails.application.routes.draw do
       resources :timestamps,  only: [:create]
     end
     resources :timestamps,  only: [:show, :index, :update, :destroy]
-    resources :articles,    only: [:show, :index]
+    resources :articles,    only: [:show, :index, :create]
   end
 end
