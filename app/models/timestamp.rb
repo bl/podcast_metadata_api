@@ -1,5 +1,6 @@
 class Timestamp < ActiveRecord::Base
   belongs_to :podcast
+  belongs_to :article
 
   validates :podcast_id,  presence: true
   validates :start_time,  presence: true,

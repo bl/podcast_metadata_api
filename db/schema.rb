@@ -11,19 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160112204019) do
+ActiveRecord::Schema.define(version: 20160113061723) do
 
   create_table "articles", force: :cascade do |t|
     t.text     "content"
-    t.boolean  "published",    default: false
+    t.boolean  "published",  default: false
     t.integer  "author_id"
-    t.integer  "timestamp_id"
-    t.datetime "created_at",                   null: false
-    t.datetime "updated_at",                   null: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
   end
 
   add_index "articles", ["author_id"], name: "index_articles_on_author_id"
-  add_index "articles", ["timestamp_id"], name: "index_articles_on_timestamp_id"
 
   create_table "podcasts", force: :cascade do |t|
     t.string   "title"
@@ -46,8 +44,10 @@ ActiveRecord::Schema.define(version: 20160112204019) do
     t.integer  "podcast_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "article_id"
   end
 
+  add_index "timestamps", ["article_id"], name: "index_timestamps_on_article_id"
   add_index "timestamps", ["podcast_id"], name: "index_timestamps_on_podcast_id"
 
   create_table "users", force: :cascade do |t|

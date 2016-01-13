@@ -14,5 +14,15 @@ FactoryGirl.define do
         create_list(:podcast, evaluator.podcasts_count, user: user)
       end
     end
+
+    factory :user_with_articles do
+      transient do
+        articles_count 3
+      end
+
+      after(:create) do |user, evaluator|
+        create_list(:article, evaluator.articles_count, author: user)
+      end
+    end
   end
 end

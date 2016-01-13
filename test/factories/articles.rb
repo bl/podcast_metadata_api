@@ -1,8 +1,6 @@
 FactoryGirl.define do
   factory :article do
     content { FFaker::Lorem::paragraphs }
-    author nil
-    timestamp nil
+    association :author, factory: :user
   end
-
 end
