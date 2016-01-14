@@ -10,7 +10,7 @@ class V1::ArticlesController < ApplicationController
   end
 
   def index
-    @articles = Article.all
+    @articles = Article.search(params)
     render json: @articles
   end
 

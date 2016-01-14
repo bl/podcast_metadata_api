@@ -3,6 +3,10 @@ require 'test_helper'
 class V1::ArticlesControllerTest < ActionController::TestCase
 
   def setup
+    # create additional data
+    2.times do
+      FactoryGirl.create :user_with_articles
+    end
     # user with articles
     @user_with_articles = FactoryGirl.create :user_with_articles
     @articles = @user_with_articles.articles
@@ -38,6 +42,20 @@ class V1::ArticlesControllerTest < ActionController::TestCase
     articles_response = json_response[:data]
     assert_not_nil articles_response
     assert_equal Article.count, articles_response.count
+
+    assert_response 200
+  end
+
+  test "should return valid json user podcats on user_id param" do
+    get :index, { user_id: @user_with_articles.id }
+    articles = @user_with_articles.articles
+    articles_response = json_response[:data]
+    assert_not_nil articles_response
+    assert_equal articles.count, articles_response.count
+
+    articles_response.each do |response|
+      assert @user_with_articles.article_ids.include? response[:id].to_i
+    end
 
     assert_response 200
   end
