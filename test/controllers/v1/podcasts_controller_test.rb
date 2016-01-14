@@ -218,4 +218,19 @@ class V1::PodcastsControllerTest < ActionController::TestCase
 
     assert_response 204
   end
+
+  test "destroy should destroy all dependent models" do
+    podcast_with_timestamps = FactoryGirl.create :podcast_with_timestamps
+    timestamps = podcast_with_timestamps.timestamps
+    user = podcast_with_timestamps.user
+    log_in_as user
+    assert_difference 'user.podcasts.count', -1 do
+      delete :destroy, id: podcast_with_timestamps
+    end
+    assert_empty response.body
+
+    assert_empty timestamps.reload
+
+    assert_response 204
+  end
 end

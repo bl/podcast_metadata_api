@@ -4,7 +4,7 @@ class Podcast < ActiveRecord::Base
   before_validation :initialize_metadata
 
   belongs_to :user
-  has_many :timestamps
+  has_many :timestamps, dependent: :destroy
 
   mount_uploader :podcast_file, PodcastFileUploader
 
