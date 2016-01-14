@@ -181,4 +181,29 @@ class V1::UsersControllerTest < ActionController::TestCase
     
     assert_response 204
   end
+
+  test "destroy should destroy all dependent podcasts" do
+    log_in_as @user_with_podcasts
+    podcasts = @user_with_podcasts.podcasts
+    assert_difference 'User.count', -1 do
+      delete :destroy, id: @user_with_podcasts
+    end
+
+    assert_empty podcasts
+    
+    assert_response 204
+  end
+
+  test "destroy should destroy all dependent articles" do
+    user_with_articles = FactoryGirl.create :user_with_articles
+    articles = user_with_articles.articles
+    log_in_as user_with_articles
+    assert_difference 'User.count', -1 do
+      delete :destroy, id: user_with_articles
+    end
+
+    assert_empty articles
+    
+    assert_response 204
+  end
 end
