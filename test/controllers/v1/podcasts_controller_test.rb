@@ -44,6 +44,68 @@ class V1::PodcastsControllerTest < ActionController::TestCase
     assert_response 200
   end
 
+  test "should return valid json user podcats on user_id param" do
+    get :index, { user_id: @user_with_podcasts.id }
+    podcasts = @user_with_podcasts.podcasts
+    podcasts_response = json_response[:data]
+    assert_not_nil podcasts_response
+    assert_equal podcasts.count, podcasts_response.count
+
+    podcasts_response.each do |response|
+      assert @user_with_podcasts.podcast_ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "should return valid json filtered by title on title param" do
+    podcast_ids = []
+    3.times do |i|
+      podcast_attributes = FactoryGirl.attributes_for :podcast
+      podcast_attributes[:title] = "Search Pattern Matched ##{i}"
+      podcast_ids.push @user_with_podcasts.podcasts.create(podcast_attributes).id
+    end
+    get :index, { title: "search pattern matched" }
+    podcasts_response = json_response[:data]
+    assert_not_nil podcasts_response
+    assert_equal podcast_ids.count, podcasts_response.count
+
+    podcast_ids 
+    podcasts_response.each do |response|
+      assert podcast_ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "should return valid json filtered by above end_time length" do
+    get :index, { min_end_time: 32 }
+    podcasts_response = json_response[:data]
+    assert_equal Podcast.count, podcasts_response.count
+    get :index, { min_end_time: 33 }
+    podcasts_response = json_response[:data]
+    assert_equal 0, podcasts_response.count
+  end
+
+  test "should return valid json filtered by below end_time length" do
+    get :index, { max_end_time: 32 }
+    podcasts_response = json_response[:data]
+    assert_equal Podcast.count, podcasts_response.count
+    get :index, { max_end_time: 31 }
+    podcasts_response = json_response[:data]
+    assert_equal 0, podcasts_response.count
+  end
+
+  #TODO: add aditinal podcasts with different endimes for more through testing
+  test "should return valid json filtered by multiple filters" do 
+    get :index, { min_end_time: 32, max_end_time: 32 }
+    podcasts_response = json_response[:data]
+    assert_equal Podcast.count, podcasts_response.count
+    get :index, { min_end_time: 33, max_end_time: 35}
+    podcasts_response = json_response[:data]
+    assert_equal 0, podcasts_response.count
+  end
+
   # CREATE
 
   test "create should return json errors when not logged in" do

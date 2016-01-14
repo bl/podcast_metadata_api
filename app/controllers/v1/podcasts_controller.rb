@@ -10,7 +10,7 @@ class V1::PodcastsController < ApplicationController
   end
 
   def index
-    @podcasts = Podcast.all
+    @podcasts = Podcast.search params
     render json: @podcasts
   end
 
