@@ -77,7 +77,7 @@ class V1::UsersControllerTest < ActionController::TestCase
 
   test "update should return authorization error when not logged in" do
     update_user_attributes = { name: "New Name" }
-    post :update, id: @user, user: update_user_attributes
+    patch :update, id: @user, user: update_user_attributes
     user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /Not authenticated/, user_errors.to_s
@@ -88,7 +88,7 @@ class V1::UsersControllerTest < ActionController::TestCase
   test "should return json errors on invalid user id" do
     update_user_attributes = { email: "new_email@example.com" }
     log_in_as @user
-    post :update, id: -1, user: update_user_attributes
+    patch :update, id: -1, user: update_user_attributes
     user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /Invalid user/, user_errors.to_s
@@ -99,7 +99,7 @@ class V1::UsersControllerTest < ActionController::TestCase
   test "should return json errors on other user id update" do
     update_user_attributes = { email: "new_email@example.com" }
     log_in_as @user
-    post :update, id: @other_user, user: update_user_attributes
+    patch :update, id: @other_user, user: update_user_attributes
     user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /Invalid user/, user_errors.to_s
@@ -110,7 +110,7 @@ class V1::UsersControllerTest < ActionController::TestCase
   test "should return valid json on valid user update" do
     update_user_attributes = { name: "New Name", email: "new_email@example.com" }
     log_in_as @user
-    post :update, id: @user, user: update_user_attributes
+    patch :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload
@@ -125,7 +125,7 @@ class V1::UsersControllerTest < ActionController::TestCase
     new_password = "123456"
     log_in_as @user
     update_user_attributes = { password: new_password, password_confirmation: new_password }
-    post :update, id: @user, user: update_user_attributes
+    patch :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload

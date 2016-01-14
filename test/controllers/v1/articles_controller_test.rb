@@ -98,7 +98,7 @@ class V1::ArticlesControllerTest < ActionController::TestCase
 
   test "update should return json errors when nog logged-in" do
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
-    post :update, id: @articles.first, article: valid_article_attributes
+    patch :update, id: @articles.first, article: valid_article_attributes
     article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /Not authenticated/, article_errors
@@ -109,7 +109,7 @@ class V1::ArticlesControllerTest < ActionController::TestCase
   test "should return json errors when updating non-logged users article" do
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     log_in_as @user
-    post :update, id: @articles.first, article: valid_article_attributes
+    patch :update, id: @articles.first, article: valid_article_attributes
     article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /Invalid article/, article_errors
@@ -120,7 +120,7 @@ class V1::ArticlesControllerTest < ActionController::TestCase
   test "update should return json errors when using invalid podcast id" do
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     log_in_as @user_with_articles
-    post :update, id: -1, article: valid_article_attributes
+    patch :update, id: -1, article: valid_article_attributes
     article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /Invalid article/, article_errors
@@ -131,7 +131,7 @@ class V1::ArticlesControllerTest < ActionController::TestCase
   test "update should return json errors on invalid attributes" do
     invalid_article_attributes = { content: " " }
     log_in_as @user_with_articles
-    post :update, id: @articles.first, article: invalid_article_attributes
+    patch :update, id: @articles.first, article: invalid_article_attributes
     article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /can't be blank/, article_errors[:content].to_s
@@ -142,7 +142,7 @@ class V1::ArticlesControllerTest < ActionController::TestCase
   test "update should return valid json on valid attributes" do
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     log_in_as @user_with_articles
-    post :update, id: @articles.first, article: valid_article_attributes
+    patch :update, id: @articles.first, article: valid_article_attributes
     article_response = json_response[:data]
     assert_not_nil article_response
     assert_equal valid_article_attributes[:content], @articles.first.reload.content 

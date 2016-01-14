@@ -181,7 +181,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
 
   test "update should return json errors when not logged-in" do
     valid_podcast_attributes = { title: "new title" }
-    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
+    patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /Not authenticated/, podcast_errors
@@ -192,7 +192,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "should return json errors when updating non-logged-in users podcast" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user
-    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
+    patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /Invalid podcast/, podcast_errors
@@ -203,7 +203,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return json errors when using invalid podcast id" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user_with_podcasts
-    post :update, id: -1, podcast: valid_podcast_attributes
+    patch :update, id: -1, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /Invalid podcast/, podcast_errors
@@ -214,7 +214,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return json errors on invalid attributes" do
     valid_podcast_attributes = { title: " " }
     log_in_as @user_with_podcasts
-    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
+    patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:errors]
     assert_not_nil podcast_errors
     assert_match /can't be blank/, podcast_errors[:title].to_s
@@ -225,7 +225,7 @@ class V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return valid json on valid attributes" do
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user_with_podcasts
-    post :update, id: @podcasts.first, podcast: valid_podcast_attributes
+    patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
     assert_equal valid_podcast_attributes[:title], @podcasts.first.reload.title
