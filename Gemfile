@@ -30,6 +30,12 @@ gem 'rails-api', '~> 0.4'
 gem 'taglib-ruby'
 # Carrierwave used for uploading podcast audio data
 gem 'carrierwave'
+# HTTP client library used by Her
+gem 'faraday'
+# Faraday middlware used by Her
+gem 'faraday_middleware'
+# Object Relational Mapper used to map RESTful API resources to web client
+gem 'her'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
