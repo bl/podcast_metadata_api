@@ -20,6 +20,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     user_response = json_response[:data]
     assert_not_nil user_response
     assert @user.id, user_response[:attributes][:id]
+    assert_not user_response[:attributes][:auth_token]
     
     assert_response 200
   end

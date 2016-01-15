@@ -6,7 +6,7 @@ class Api::V1::SessionsController < ApplicationController
       # generate new auth_token on valid log-in
       @user.create_auth_token
       @user.save
-      render json: @user, status: 200
+      render json: @user, serializer: UserAuthSerializer, status: 200
     else
       render json: { errors: "Invalid email or password" }, status: 422
     end
