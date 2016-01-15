@@ -1,4 +1,4 @@
-class V1::PodcastsController < ApplicationController
+class Api::V1::PodcastsController < ApplicationController
   before_action :logged_in_user,  only: [:create, :update, :destroy]
   before_action :correct_podcast, only: [:update, :destroy]
 

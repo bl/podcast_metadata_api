@@ -1,4 +1,4 @@
-class V1::TimestampsController < ApplicationController
+class Api::V1::TimestampsController < ApplicationController
   before_action :logged_in_user,    only: [:create, :update, :destroy]
   before_action :correct_podcast,   only: [:create]
   before_action :correct_timestamp, only: [:update, :destroy]

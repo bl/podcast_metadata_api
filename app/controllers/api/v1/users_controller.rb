@@ -1,4 +1,4 @@
-class V1::UsersController < ApplicationController
+class Api::V1::UsersController < ApplicationController
   before_action :logged_in_user,  only: [:update, :destroy]
   before_action :correct_user,    only: [:update, :destroy]
 

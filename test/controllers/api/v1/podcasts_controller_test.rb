@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class V1::PodcastsControllerTest < ActionController::TestCase
+class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   def setup
     # create additional data

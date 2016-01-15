@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class V1::SessionsControllerTest < ActionController::TestCase
+class Api::V1::SessionsControllerTest < ActionController::TestCase
   def setup
     @user = FactoryGirl.create :user
     include_default_accept_headers

@@ -1,4 +1,4 @@
-class V1::ArticlesController < ApplicationController
+class Api::V1::ArticlesController < ApplicationController
   before_action :logged_in_user,  only: [:create, :update, :destroy]
   before_action :correct_article, only: [:update, :destroy]
 

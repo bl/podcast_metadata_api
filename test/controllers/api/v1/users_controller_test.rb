@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class V1::UsersControllerTest < ActionController::TestCase
+class Api::V1::UsersControllerTest < ActionController::TestCase
 
   def setup
     # create additional data, verify more than record in db

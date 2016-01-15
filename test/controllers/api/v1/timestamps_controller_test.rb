@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class V1::TimestampsControllerTest < ActionController::TestCase
+class Api::V1::TimestampsControllerTest < ActionController::TestCase
   def setup
     # create additional data
     2.times do
