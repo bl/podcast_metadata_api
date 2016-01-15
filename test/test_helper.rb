@@ -15,7 +15,7 @@ class ActiveSupport::TestCase
     model.use_api(api = Her::API::new)
 
     # configure Her client API
-    api.setup url: "http://api.lvh.me" do |c|
+    api.setup url: "http://api.lvh.me:3000" do |c|
       c.adapter(:test) { |s| yield(s) }
     end
   end
