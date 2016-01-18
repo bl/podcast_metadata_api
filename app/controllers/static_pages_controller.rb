@@ -1,5 +1,6 @@
 class StaticPagesController < ApplicationController
   def home
+    @users = PodcastApiClient::V1::User.all
   end
 
   def about
