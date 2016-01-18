@@ -1,6 +1,8 @@
 class StaticPagesController < ApplicationController
   def home
-    @users = PodcastApiClient::V1::User.all
+    record = PodcastApiClient::V1::User
+    call = :all
+    CallPodcastApiJob.perform_now record, call
   end
 
   def about
