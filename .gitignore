@@ -13,6 +13,9 @@
 # ignore rails public assets directory
 /public/*
 
+# ignore server configuration files
+/shared/*
+
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal

@@ -9,17 +9,6 @@ class ActiveSupport::TestCase
   # mixin fixture_file_upload for podcast tests
   include ActionDispatch::TestProcess
 
-  # TODO: move to test_helper exclusively for client
-  # stub api for client resource model to use Her api tests
-  def stub_api_for(model)
-    PodcastApiClient::V1.configure "lvh.me:9292" do |c|
-      c.use Her::Middleware::FirstLevelParseJSON
-      c.adapter(:test) { |s| yield(s) }
-    end
-
-    model.use_api PodcastApiClient::V1.api
-  end
-
   def open_podcast_file(file_name)
    fixture_file_upload("podcasts/#{file_name}", 'audio/') 
   end
