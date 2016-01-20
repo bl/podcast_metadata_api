@@ -4,7 +4,7 @@ class Api::V1::PodcastsController < ApplicationController
 
   def show
     @podcast = Podcast.find_by id: params[:id]
-    render json: { errors: "Invalid podcast" }, status: 403 and return unless @podcast
+    render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 403 and return unless @podcast
 
     render json: @podcast
   end
@@ -19,7 +19,7 @@ class Api::V1::PodcastsController < ApplicationController
     if @podcast.save
       render json: @podcast, status: 201
     else
-      render json: { errors: @podcast.errors }, status: 422
+      render json: ErrorSerializer.serialize(@podcast.errors), status: 422
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::PodcastsController < ApplicationController
     if @podcast.update(podcast_params)
       render json: @podcast, status: 200
     else
-      render json: { errors: @podcast.errors }, status: 422
+      render json: ErrorSerializer.serialize(@podcast.errors), status: 422
     end
   end
 
@@ -44,6 +44,6 @@ class Api::V1::PodcastsController < ApplicationController
 
     def correct_podcast
       @podcast ||= current_user.podcasts.find_by id: params[:id]
-      render json: { errors: "Invalid podcast" }, status: 403 unless @podcast
+      render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 403 unless @podcast
     end
 end

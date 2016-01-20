@@ -19,11 +19,11 @@ class ApplicationController < ActionController::Base
 
     def correct_podcast
       @podcast ||= current_user.podcasts.find_by id: params[:podcast_id]
-      render json: { errors: "Invalid podcast" }, status: 403 unless @podcast
+      render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 403 unless @podcast
     end
     
     def  logged_in_user
-      render json: {errors: "Not authenticated" },
+      render json: ErrorSerializer.serialize(user: "not authenticated"),
              status: :unauthorized unless logged_in?
     end
 end

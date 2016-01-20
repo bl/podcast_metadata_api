@@ -26,9 +26,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "should return errors on invalid podcast id get" do
     get :show, id: -1
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid podcast/, podcast_errors
+    assert_match /podcast/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
 
     assert_response 403
   end
@@ -114,9 +115,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_no_difference '@user.podcasts.count' do
       post :create, podcast: valid_podcast_attributes
     end
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Not authenticated/, podcast_errors
+    assert_match /user/, podcast_errors.first[:id].to_s
+    assert_match /not authenticated/, podcast_errors.first[:detail].to_s
 
     assert_response :unauthorized
   end
@@ -143,9 +145,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_no_difference '@user.podcasts.count' do
       post :create, podcast: invalid_podcast_attributes
     end
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /is not a valid audio file/, podcast_errors[:podcast_file].to_s
+    assert_match /podcast_file/, podcast_errors.first[:id].to_s
+    assert_match /is not a valid audio file/, podcast_errors.first[:detail].to_s
 
     assert_response 422
   end
@@ -182,9 +185,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   test "update should return json errors when not logged-in" do
     valid_podcast_attributes = { title: "new title" }
     patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Not authenticated/, podcast_errors
+    assert_match /user/, podcast_errors.first[:id].to_s
+    assert_match /not authenticated/, podcast_errors.first[:detail].to_s
     
     assert_response :unauthorized
   end
@@ -193,9 +197,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user
     patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid podcast/, podcast_errors
+    assert_match /podcast/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
     
     assert_response 403
   end
@@ -204,9 +209,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "new title" }
     log_in_as @user_with_podcasts
     patch :update, id: -1, podcast: valid_podcast_attributes
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid podcast/, podcast_errors
+    assert_match /podcast/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
     
     assert_response 403
   end
@@ -215,9 +221,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: " " }
     log_in_as @user_with_podcasts
     patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /can't be blank/, podcast_errors[:title].to_s
+    assert_match /title/, podcast_errors.first[:id].to_s
+    assert_match /can't be blank/, podcast_errors.first[:detail].to_s
     
     assert_response 422
   end
@@ -240,9 +247,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_no_difference '@podcasts.count' do
       delete :destroy, id: @podcasts.first
     end
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Not authenticated/, podcast_errors
+    assert_match /user/, podcast_errors.first[:id].to_s
+    assert_match /not authenticated/, podcast_errors.first[:detail].to_s
   
     assert_response :unauthorized
   end
@@ -252,9 +260,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_no_difference '@podcasts.count' do
       delete :destroy, id: -1
     end
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid podcast/, podcast_errors
+    assert_match /podcast/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
   
     assert_response 403
   end
@@ -264,9 +273,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_no_difference '@podcasts.count' do
       delete :destroy, id: @podcasts.first
     end
-    podcast_errors = json_response[:errors]
+    podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
-    assert_match /Invalid podcast/, podcast_errors
+    assert_match /podcast/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
   
     assert_response 403
   end

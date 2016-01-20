@@ -5,7 +5,7 @@ class Api::V1::TimestampsController < ApplicationController
 
   def show
     @timestamp = Timestamp.find_by id: params[:id]
-    render json: { errors: "Invalid timestamp" }, status: 403 and return unless @timestamp
+    render json: ErrorSerializer.serialize(timestamp: "is invalid"), status: 403 and return unless @timestamp
 
     render json: @timestamp
   end
@@ -20,7 +20,7 @@ class Api::V1::TimestampsController < ApplicationController
     if @timestamp.save
       render json: @timestamp, status: 201
     else
-      render json: { errors: @timestamp.errors }, status: 422
+      render json: ErrorSerializer.serialize(@timestamp.errors), status: 422
     end
   end
 
@@ -28,7 +28,7 @@ class Api::V1::TimestampsController < ApplicationController
     if @timestamp.update(timestamp_params)
       render json: @timestamp, status: 200
     else
-      render json: { errors: @timestamp.errors }, status: 422
+      render json: ErrorSerializer.serialize(@timestamp.errors), status: 422
     end
   end
 
@@ -42,7 +42,7 @@ class Api::V1::TimestampsController < ApplicationController
     def correct_timestamp
       @timestamp ||= Timestamp.find_by id: params[:id]
       unless @timestamp && @timestamp.podcast.user == current_user
-        render json: { errors: "Invalid timestamp" }, status: 403
+        render json: ErrorSerializer.serialize(timestamp: "is invalid"), status: 403
       end
     end
     

@@ -17,7 +17,7 @@ class Api::V1::UsersController < ApplicationController
     if @user.save
       render json: @user, status: 201
     else
-      render json: { errors: @user.errors }, status: 422
+      render json: ErrorSerializer.serialize(@user.errors), status: 422
     end
   end
 
@@ -26,7 +26,7 @@ class Api::V1::UsersController < ApplicationController
     if @user.update(user_params)
       render json: @user, status: 200
     else
-      render json: { errors: @user.errors }, status: 422
+      render json: ErrorSerializer.serialize(@user.errors), status: 422
     end
   end
 
@@ -43,7 +43,7 @@ class Api::V1::UsersController < ApplicationController
 
     def correct_user
       user ||= User.find_by id: params[:id]
-      render json: { errors: "Invalid user" },
+      render json: ErrorSerializer.serialize( user: "is invalid"),
              status: 403 unless current_user?(user)
     end
 end

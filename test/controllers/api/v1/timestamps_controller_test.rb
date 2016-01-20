@@ -25,9 +25,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "should return json errors on invalid timetamp id get" do
     get :show, id: -1
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid timestamp/, timestamp_errors
+    assert_match /timestamp/, timestamp_errors.first[:id].to_s
+    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
     assert_response 403
   end
@@ -50,9 +51,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@podcast.timestamps.count' do
       post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Not authenticated/, timestamp_errors
+    assert_match /user/, timestamp_errors.first[:id].to_s
+    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
 
     assert_response :unauthorized
   end
@@ -63,9 +65,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@podcast.timestamps.count' do
       post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid podcast/, timestamp_errors
+    assert_match /podcast/, timestamp_errors.first[:id].to_s
+    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
     assert_response 403
   end
@@ -76,9 +79,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@podcast.timestamps.count' do
       post :create, podcast_id: @podcast, timestamp: invalid_timestamp_attributes
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /must be less than start time/, timestamp_errors[:end_time].to_s
+    assert_match /end_time/, timestamp_errors.first[:id].to_s
+    assert_match /must be less than start time/, timestamp_errors.first[:detail].to_s
 
     assert_response 422
   end
@@ -101,9 +105,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   test "update should return json errors when not logged in" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
     patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Not authenticated/, timestamp_errors
+    assert_match /user/, timestamp_errors.first[:id].to_s
+    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
 
     assert_response :unauthorized
   end
@@ -112,9 +117,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
     log_in_as @podcast.user
     patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid timestamp/, timestamp_errors
+    assert_match /timestamp/, timestamp_errors.first[:id].to_s
+    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
     assert_response 403
   end
@@ -123,9 +129,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     invalid_timestamp_attributes = { start_time: @podcast_with_timestamps.end_time, end_time: nil }
     log_in_as @podcast_with_timestamps.user
     patch :update, id: @timestamps.first, timestamp: invalid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /must be within podcast length/, timestamp_errors[:start_time].to_s
+    assert_match /start_time/, timestamp_errors.first[:id].to_s
+    assert_match /must be within podcast length/, timestamp_errors.first[:detail].to_s
 
     assert_response 422
   end
@@ -148,9 +155,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@timestamps.count' do
       delete :destroy, id: @timestamps.first
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Not authenticated/, timestamp_errors
+    assert_match /user/, timestamp_errors.first[:id].to_s
+    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
 
     assert_response :unauthorized
   end
@@ -160,9 +168,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@timestamps.count' do
       delete :destroy, id: -1
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid timestamp/, timestamp_errors
+    assert_match /timestamp/, timestamp_errors.first[:id].to_s
+    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
     assert_response 403
   end
@@ -172,9 +181,10 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_no_difference '@timestamps.count' do
       delete :destroy, id: @timestamps.first
     end
-    timestamp_errors = json_response[:errors]
+    timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
-    assert_match /Invalid timestamp/, timestamp_errors
+    assert_match /timestamp/, timestamp_errors.first[:id].to_s
+    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
     assert_response 403
   end

@@ -12,9 +12,10 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     invalid_login_attributes = { email:     "invalid_email.com",
                                  password:  "password" }
     post :create, session: invalid_login_attributes
-    session_response = json_response[:errors]
+    session_response = json_response[:Errors]
     assert_not_nil session_response
-    assert_match /Invalid email or password/, session_response.to_s
+    assert_match /email_password/, session_response.first[:id].to_s
+    assert_match /is invalid/, session_response.first.to_s
   end
 
   test "should return valid json on valid user login" do

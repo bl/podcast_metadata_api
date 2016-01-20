@@ -4,7 +4,7 @@ class Api::V1::ArticlesController < ApplicationController
 
   def show
     @article = Article.find_by id: params[:id]
-    render json: { errors: "Invalid article" }, status: 403 and return unless @article
+    render json: ErrorSerializer.serialize(article: "is invalid"), status: 403 and return unless @article
 
     render json: @article
   end
@@ -19,7 +19,7 @@ class Api::V1::ArticlesController < ApplicationController
     if @article.save
       render json: @article, status: 201
     else
-      render json: { errors: @article.errors }, status: 422
+      render json: ErrorSerializer.serialize(@article.errors), status: 422
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::ArticlesController < ApplicationController
     if @article.update(article_params)
       render json: @article, status: 200
     else
-      render json: { errors: @article.errors }, status: 422
+      render json: ErrorSerializer.serialize(@article.errors), status: 422
     end
   end
 
@@ -44,6 +44,6 @@ class Api::V1::ArticlesController < ApplicationController
 
     def correct_article
       @article ||= current_user.articles.find_by id: params[:id]
-      render json: { errors: "Invalid article" }, status: 403 unless @article
+      render json: ErrorSerializer.serialize(article: "is invalid"), status: 403 unless @article
     end
 end

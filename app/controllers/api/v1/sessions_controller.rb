@@ -8,7 +8,7 @@ class Api::V1::SessionsController < ApplicationController
       @user.save
       render json: @user, serializer: UserAuthSerializer, status: 200
     else
-      render json: { errors: "Invalid email or password" }, status: 422
+      render json: ErrorSerializer.serialize(email_password: "is invalid"), status: 422
     end
   end
 
