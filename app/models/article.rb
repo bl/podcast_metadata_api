@@ -1,6 +1,7 @@
 class Article < ActiveRecord::Base
   belongs_to :author, class_name: 'User'
-  belongs_to :timestamp
+
+  has_many :timestamps
 
   validates :author, presence: true
   validates :content, presence: true
