@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       end
       resources :sessions,    only: [:create, :destroy]
       resources :podcasts,    only: [:show, :index, :create, :update, :destroy] do
-        resources :timestamps,  only: [:create]
+        resources :timestamps,  only: [:create, :index]
       end
       resources :timestamps,  only: [:show, :index, :update, :destroy]
       resources :articles,    only: [:show, :index, :create, :update, :destroy]

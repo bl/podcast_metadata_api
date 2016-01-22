@@ -44,6 +44,18 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_response 200
   end
 
+  test "index should return podcast timestamps with podcast_id param" do
+    get :index, {podcast_id: @podcast_with_timestamps.id }
+    timestamp_response = json_response[:data]
+    assert_not_nil timestamp_response
+    assert_equal @timestamps.count, timestamp_response.count
+    timestamp_response.each do |res|
+      assert @podcast_with_timestamps.timestamp_ids.include? res[:id].to_i
+    end
+
+    assert_response 200
+  end
+
   # CREATE
 
   test "create should return json errors when not logged in" do

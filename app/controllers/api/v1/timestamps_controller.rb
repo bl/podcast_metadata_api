@@ -11,7 +11,7 @@ class Api::V1::TimestampsController < ApplicationController
   end
 
   def index
-    @timestamps = Timestamp.all
+    @timestamps = Timestamp.search(params)
     render json: @timestamps
   end
 
