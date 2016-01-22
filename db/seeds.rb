@@ -18,18 +18,26 @@
 end
 
 # podcasts
+# load podcasts from shared/seed_data/podcasts, associating each podcast with each user
 cur_podcast = 0
-seed_data_dir = File.expand_path('../../shared/seed_data', __FILE__)
+seed_data_dir = File.expand_path('../../shared/seed_data/podcasts', __FILE__)
 podcast_entries = Dir.entries seed_data_dir
-users = User.all
 podcast_entries.each do |podcast_file|
   next if '.' == podcast_file || '..' == podcast_file
   title =  "Generic Podcast #{cur_podcast}"
 
   puts "Creating Podcast: #{title} from file: #{podcast_file}"
   # add each podcast to next user (repeat once users exhausted)
-  users[cur_podcast % User.count].podcasts.create!(title: title,
+  User.all[cur_podcast % User.count].podcasts.create!(title: title,
                                                    podcast_file: File.open( "#{seed_data_dir}/#{podcast_file}", "r"))
 
   cur_podcast += 1
+end
+
+# articles
+# create articles for each user
+User.all.each do |user|
+  3.times do
+    user.articles.create!(content: FFaker::BaconIpsum.paragraphs)
+  end
 end

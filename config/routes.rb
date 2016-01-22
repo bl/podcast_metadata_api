@@ -7,6 +7,7 @@ Rails.application.routes.draw do
           constraints: ApiConstraints.new(version: 1, default: true) do
       resources :users,       only: [:show, :index, :create, :update, :destroy] do
         resources :podcasts,    only: [:index]
+        resources :articles,    only: [:index]
       end
       resources :sessions,    only: [:create, :destroy]
       resources :podcasts,    only: [:show, :index, :create, :update, :destroy] do
