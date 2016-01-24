@@ -3,10 +3,10 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.5'
+# rails api framework
+gem 'rails-api', '~> 0.4'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
-
-# API client gems
 
 # Use SCSS for stylesheets
 #gem 'sass-rails', '~> 5.0'
@@ -19,8 +19,6 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'active_model_serializers', git: 'https://github.com/rails-api/active_model_serializers.git'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-# rails api framework
-gem 'rails-api', '~> 0.4'
 # used for reading audio file metadata tags
 gem 'taglib-ruby'
 # Carrierwave used for uploading podcast audio data
@@ -45,6 +43,6 @@ group :development do
   gem 'guard-minitest',     '2.3.1'
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  #gem 'spring'
+  gem 'spring'
 end
 
