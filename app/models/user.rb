@@ -4,7 +4,8 @@ class User < ActiveRecord::Base
   #   allows for making API calls right after creation without needing to log-in
   before_create :create_auth_token
 
-  has_many :podcasts, dependent: :destroy
+  has_many :series,   dependent: :destroy
+  has_many :podcasts, through: :series
   has_many :articles, foreign_key: 'author_id', 
                       dependent: :destroy
 

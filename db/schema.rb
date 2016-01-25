@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160113061723) do
+ActiveRecord::Schema.define(version: 20160124130123) do
 
   create_table "articles", force: :cascade do |t|
     t.text     "content"
@@ -37,6 +37,16 @@ ActiveRecord::Schema.define(version: 20160113061723) do
   add_index "podcasts", ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
   add_index "podcasts", ["title"], name: "index_podcasts_on_title"
   add_index "podcasts", ["user_id"], name: "index_podcasts_on_user_id"
+
+  create_table "series", force: :cascade do |t|
+    t.string   "title"
+    t.boolean  "published",  default: false
+    t.integer  "user_id"
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+  end
+
+  add_index "series", ["user_id"], name: "index_series_on_user_id"
 
   create_table "timestamps", force: :cascade do |t|
     t.integer  "start_time"
