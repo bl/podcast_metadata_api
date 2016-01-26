@@ -3,6 +3,7 @@ class Series < ActiveRecord::Base
 
   has_many :podcasts, dependent: :destroy
 
+  validates :user,  presence: true
   validates :title, presence: true,
                     length: { maximum: 100 }
 

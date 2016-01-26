@@ -3,7 +3,7 @@ require 'taglib'
 class Podcast < ActiveRecord::Base
   before_validation :initialize_metadata
 
-  belongs_to :user
+  belongs_to :series
   has_many :timestamps, dependent: :destroy
 
   mount_uploader :podcast_file, PodcastFileUploader
@@ -13,7 +13,7 @@ class Podcast < ActiveRecord::Base
   #TODO: look into carrierwave's validation
   # possibly redundant presence check
   validates :podcast_file,  presence: true
-  validates :user_id,       presence: true
+  validates :series,        presence: true
   validates :end_time,      presence: true, 
                             numericality: { gerater_than_or_equal_to: 5 }
   validates :bitrate,       presence: true,

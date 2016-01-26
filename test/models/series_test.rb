@@ -15,6 +15,11 @@ class SeriesTest < ActiveSupport::TestCase
     assert_not @series.valid?
   end
 
+  test "user should be present" do
+    @series.user = nil
+    assert_not @series.valid?
+  end
+
   test "title should be less than or equal to 100 characters" do
     @series.title = "a" * 100
     assert @series.valid?

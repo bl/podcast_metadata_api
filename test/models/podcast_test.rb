@@ -2,8 +2,9 @@ require 'test_helper'
 
 class PodcastTest < ActiveSupport::TestCase
   def setup
-    @user = FactoryGirl.create :user
-    @podcast = @user.podcasts.build(title: "New Games Podcast",
+    @user = FactoryGirl.create :user_with_series
+    @series = @user.series.first
+    @podcast = @series.podcasts.build(title: "New Games Podcast",
                                     podcast_file: fixture_file_upload('podcasts/edenlarge.mp3', 'audio/mpeg'))
   end
 
@@ -34,10 +35,10 @@ class PodcastTest < ActiveSupport::TestCase
     assert_match /is not a valid audio file/, @podcast.errors[:podcast_file].to_s
   end
 
-  # user
+  # series
 
-  test "podcast user should be present" do
-    @podcast.user = nil
+  test "podcast series should be present" do
+    @podcast.series = nil
     assert_not @podcast.valid?
   end
 
