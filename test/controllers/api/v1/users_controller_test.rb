@@ -9,7 +9,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     end
     @user = FactoryGirl.create :user
     @other_user = FactoryGirl.create :user
-    @user_with_podcasts = FactoryGirl.create :user_with_podcasts
+    @user_with_series = FactoryGirl.create :user_with_series
     include_default_accept_headers
   end
 
@@ -25,13 +25,13 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_response 200
   end
 
-  test "should return user json and podcasts relationship on valid user get" do
-    get :show, id: @user_with_podcasts
+  test "should return user json and series relationship on valid user get" do
+    get :show, id: @user_with_series
     user_response = json_response[:data]
     assert_not_nil user_response
-    user_podcasts_response = user_response[:relationships][:podcasts][:data]
-    assert_not_nil user_podcasts_response
-    assert_equal @user_with_podcasts.podcasts.count, user_podcasts_response.count
+    user_series_response = user_response[:relationships][:series][:data]
+    assert_not_nil user_series_response
+    assert_equal @user_with_series.series.count, user_series_response.count
   end
 
   # INDEX
@@ -190,17 +190,30 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_response 204
   end
 
-  test "destroy should destroy all dependent podcasts" do
-    log_in_as @user_with_podcasts
-    podcasts = @user_with_podcasts.podcasts
+  test "destroy should destroy all dependent series" do
+    log_in_as @user_with_series
+    series = @user_with_series.series
     assert_difference 'User.count', -1 do
-      delete :destroy, id: @user_with_podcasts
+      delete :destroy, id: @user_with_series
     end
 
-    assert_empty podcasts
+    assert_empty series
     
     assert_response 204
   end
+
+  #TODO: move dependent podcasts destruction to series controller
+#  test "destroy should destroy all dependent podcasts" do
+#    log_in_as @user_with_series
+#    podcasts = @user_with_series.podcasts
+#    assert_difference 'User.count', -1 do
+#      delete :destroy, id: @user_with_series
+#    end
+#
+#    assert_empty podcasts
+#    
+#    assert_response 204
+#  end
 
   test "destroy should destroy all dependent articles" do
     user_with_articles = FactoryGirl.create :user_with_articles
