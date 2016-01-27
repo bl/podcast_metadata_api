@@ -27,6 +27,13 @@ class SeriesTest < ActiveSupport::TestCase
     assert_not @series.valid?
   end
 
+  test "description should be less than or equal to 1000 characters" do
+    @series.description = "a" * 1000
+    assert @series.valid?
+    @series.description += "a"
+    assert_not @series.valid?
+  end
+
   test "series should not be published by default" do
     assert_not @series.published
   end
