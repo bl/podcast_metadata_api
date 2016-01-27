@@ -25,6 +25,16 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_response 200
   end
 
+  test "should return json errors on invalid user id get" do
+    get :show, id: -1
+    user_errors = json_response[:Errors]
+    assert_not_nil user_errors
+    assert_match /user/, user_errors.first[:id].to_s
+    assert_match /is invalid/, user_errors.first[:detail].to_s
+
+    assert_response 403
+  end
+
   test "should return user json and series relationship on valid user get" do
     get :show, id: @user_with_series
     user_response = json_response[:data]
