@@ -212,19 +212,6 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_response 204
   end
 
-  #TODO: move dependent podcasts destruction to series controller
-#  test "destroy should destroy all dependent podcasts" do
-#    log_in_as @user_with_series
-#    podcasts = @user_with_series.podcasts
-#    assert_difference 'User.count', -1 do
-#      delete :destroy, id: @user_with_series
-#    end
-#
-#    assert_empty podcasts
-#    
-#    assert_response 204
-#  end
-
   test "destroy should destroy all dependent articles" do
     user_with_articles = FactoryGirl.create :user_with_articles
     articles = user_with_articles.articles

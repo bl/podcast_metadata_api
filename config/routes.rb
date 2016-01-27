@@ -6,10 +6,12 @@ Rails.application.routes.draw do
     scope module: :v1,
           constraints: ApiConstraints.new(version: 1, default: true) do
       resources :users,       only: [:show, :index, :create, :update, :destroy] do
+        resources :series,      only: [:index]
         resources :podcasts,    only: [:index]
         resources :articles,    only: [:index]
       end
       resources :sessions,    only: [:create, :destroy]
+      resources :series,      only: [:show, :index, :create, :update, :destroy]
       resources :podcasts,    only: [:show, :index, :create, :update, :destroy] do
         resources :timestamps,  only: [:create, :index]
       end
