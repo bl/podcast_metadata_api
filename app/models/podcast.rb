@@ -37,6 +37,10 @@ class Podcast < ActiveRecord::Base
       user = User.find_by id: params[:user_id]
       podcasts = user.podcasts if user
     end
+    if params[:series_id].present?
+      series = Series.find_by id: params[:series_id]
+      podcasts = series.podcasts if series
+    end
     podcasts = podcasts.filter_by_title(params[:title]) if params[:title].present?
     podcasts = podcasts.above_or_equal_to_end_time(params[:min_end_time].to_i) if params[:min_end_time].present?
     podcasts = podcasts.below_or_equal_to_end_time(params[:max_end_time].to_i) if params[:max_end_time].present?

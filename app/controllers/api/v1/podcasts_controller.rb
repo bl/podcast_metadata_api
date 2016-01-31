@@ -1,5 +1,6 @@
 class Api::V1::PodcastsController < ApplicationController
   before_action :logged_in_user,  only: [:create, :update, :destroy]
+  before_action :correct_series,  only: [:create]
   before_action :correct_podcast, only: [:update, :destroy]
 
   def show
@@ -15,7 +16,7 @@ class Api::V1::PodcastsController < ApplicationController
   end
 
   def create
-    @podcast = current_user.podcasts.build(podcast_params)
+    @podcast = @series.podcasts.build(podcast_params)
     if @podcast.save
       render json: @podcast, status: 201
     else
@@ -45,5 +46,11 @@ class Api::V1::PodcastsController < ApplicationController
     def correct_podcast
       @podcast ||= current_user.podcasts.find_by id: params[:id]
       render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 403 unless @podcast
+    end
+
+    # TODO: refactor with series controller's correct_series method
+    def correct_series
+      @series ||= current_user.series.find_by id: params[:series_id]
+      render json: ErrorSerializer.serialize(series: "is invalid"), status: 403 unless @series
     end
 end

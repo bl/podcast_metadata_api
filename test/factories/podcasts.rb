@@ -6,7 +6,7 @@ FactoryGirl.define do
 
     title "Example Podcast"
     podcast_file { fixture_file_upload("test/fixtures/podcasts/#{podcast_file_name}", 'audio/mpeg') }
-    user
+    series
 
     factory :podcast_with_timestamps do
       transient do

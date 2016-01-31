@@ -5,11 +5,25 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   def setup
     # create additional data
     2.times do
-      FactoryGirl.create :user_with_podcasts
+      misc_user = FactoryGirl.create :user_with_series
+      misc_series = misc_user.series
+      misc_series.each do |series|
+        2.times do
+          series.podcasts.create(FactoryGirl.attributes_for :podcast)
+        end
+      end
     end
-    @user = FactoryGirl.create :user
-    @user_with_podcasts = FactoryGirl.create :user_with_podcasts
-    @podcasts = @user_with_podcasts.podcasts
+    # user with empty series
+    @user = (FactoryGirl.create :user_with_series, series_count: 1)
+    @series = @user.series.first
+    # user with series containing podcasts (3 in first series, 1 in second series)
+    @user_with_series = FactoryGirl.create(:user_with_series, series_count: 3)
+    @series_with_podcasts = @user_with_series.series.first
+    3.times do
+        @series_with_podcasts.podcasts.create (FactoryGirl.attributes_for :podcast)
+    end
+    @user_with_series.series.second.podcasts.create (FactoryGirl.attributes_for :podcast)
+    @podcasts = @series_with_podcasts.podcasts
     include_default_accept_headers
   end
 
@@ -46,14 +60,28 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   end
 
   test "should return valid json user podcats on user_id param" do
-    get :index, { user_id: @user_with_podcasts.id }
-    podcasts = @user_with_podcasts.podcasts
+    get :index, { user_id: @user_with_series.id }
+    podcasts = @user_with_series.podcasts
     podcasts_response = json_response[:data]
     assert_not_nil podcasts_response
     assert_equal podcasts.count, podcasts_response.count
 
     podcasts_response.each do |response|
-      assert @user_with_podcasts.podcast_ids.include? response[:id].to_i
+      assert @user_with_series.podcast_ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "should return valid json user podcats on series_id param" do
+    get :index, { series_id: @series_with_podcasts.id }
+    podcasts = @series_with_podcasts.podcasts
+    podcasts_response = json_response[:data]
+    assert_not_nil podcasts_response
+    assert_equal podcasts.count, podcasts_response.count
+
+    podcasts_response.each do |response|
+      assert @user_with_series.podcast_ids.include? response[:id].to_i
     end
 
     assert_response 200
@@ -64,7 +92,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     3.times do |i|
       podcast_attributes = FactoryGirl.attributes_for :podcast
       podcast_attributes[:title] = "Search Pattern Matched ##{i}"
-      podcast_ids.push @user_with_podcasts.podcasts.create(podcast_attributes).id
+      podcast_ids.push @series_with_podcasts.podcasts.create(podcast_attributes).id
     end
     get :index, { title: "search pattern matched" }
     podcasts_response = json_response[:data]
@@ -112,8 +140,8 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   test "create should return json errors when not logged in" do
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
-    assert_no_difference '@user.podcasts.count' do
-      post :create, podcast: valid_podcast_attributes
+    assert_no_difference '@series.podcasts.count' do
+      post :create, series_id: @series, podcast: valid_podcast_attributes
     end
     podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
@@ -122,28 +150,28 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
     assert_response :unauthorized
   end
-
-  test "should only add podcast to logged in users podcasts" do
+  
+  test "create should reutrn errors on invalid series_id" do
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
     log_in_as @user
-    before_create_count = @user.podcasts.count
-    assert_no_difference '@user_with_podcasts.podcasts.count' do
-      post :create, podcast: valid_podcast_attributes
+    assert_no_difference '@series.podcasts.count' do
+      post :create, series_id: -1, podcast: valid_podcast_attributes
     end
-    podcast_response = json_response[:data]
-    assert_not_nil podcast_response
-    assert_equal before_create_count+1, @user.reload.podcasts.count
+    podcast_errors = json_response[:Errors]
+    assert_not_nil podcast_errors
+    assert_match /series/, podcast_errors.first[:id].to_s
+    assert_match /is invalid/, podcast_errors.first[:detail].to_s
 
-    assert_response 201
+    assert_response 403
   end
 
   test "create should return errors on invalid attribute" do
     invalid_podcast_attributes = { title: "New Podcast Name",
                                    podcast_file: "invalid_file" }
     log_in_as @user
-    assert_no_difference '@user.podcasts.count' do
-      post :create, podcast: invalid_podcast_attributes
+    assert_no_difference '@series.podcasts.count' do
+      post :create, series_id: @series, podcast: invalid_podcast_attributes
     end
     podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
@@ -157,8 +185,8 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('edenlarge.mp3') }
     log_in_as @user
-    assert_difference '@user.podcasts.count', 1 do
-      post :create, podcast: valid_podcast_attributes
+    assert_difference '@series.podcasts.count', 1 do
+      post :create, series_id: @series, podcast: valid_podcast_attributes
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -170,8 +198,8 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  remote_podcast_file_url: "http://www.magnac.com/sounds/edensmall.mp3" }
     log_in_as @user
-    assert_difference '@user.podcasts.count', 1 do
-      post :create, podcast: valid_podcast_attributes
+    assert_difference '@series.podcasts.count', 1 do
+      post :create, series_id: @series, podcast: valid_podcast_attributes
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -207,7 +235,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "update should return json errors when using invalid podcast id" do
     valid_podcast_attributes = { title: "new title" }
-    log_in_as @user_with_podcasts
+    log_in_as @user_with_series
     patch :update, id: -1, podcast: valid_podcast_attributes
     podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
@@ -219,7 +247,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "update should return json errors on invalid attributes" do
     valid_podcast_attributes = { title: " " }
-    log_in_as @user_with_podcasts
+    log_in_as @user_with_series
     patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_errors = json_response[:Errors]
     assert_not_nil podcast_errors
@@ -231,7 +259,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "update should return valid json on valid attributes" do
     valid_podcast_attributes = { title: "new title" }
-    log_in_as @user_with_podcasts
+    log_in_as @user_with_series
     patch :update, id: @podcasts.first, podcast: valid_podcast_attributes
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -256,7 +284,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   end
 
   test "should return json errors on invalid podcast id podcast destroy" do
-    log_in_as @user_with_podcasts
+    log_in_as @user_with_series
     assert_no_difference '@podcasts.count' do
       delete :destroy, id: -1
     end
@@ -282,7 +310,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   end
 
   test "should return empty payload on valid podcast destroy" do
-    log_in_as @user_with_podcasts
+    log_in_as @user_with_series
     assert_difference '@podcasts.count', -1 do
       delete :destroy, id: @podcasts.first
     end
@@ -292,12 +320,11 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   end
 
   test "destroy should destroy all dependent models" do
-    podcast_with_timestamps = FactoryGirl.create :podcast_with_timestamps
-    timestamps = podcast_with_timestamps.timestamps
-    user = podcast_with_timestamps.user
-    log_in_as user
-    assert_difference 'user.podcasts.count', -1 do
-      delete :destroy, id: podcast_with_timestamps
+    timestamps = @podcasts.first.timestamps
+    timestamps.create (FactoryGirl.attributes_for :timestamp, podcast_end_time: @podcasts.first.end_time)
+    log_in_as @user_with_series
+    assert_difference '@podcasts.count', -1 do
+      delete :destroy, id: @podcasts.first
     end
     assert_empty response.body
 
