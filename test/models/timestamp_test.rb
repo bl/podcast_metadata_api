@@ -2,8 +2,7 @@ require 'test_helper'
 
 class TimestampTest < ActiveSupport::TestCase
   def setup
-    # create podcast using file 'edenlarge.mp3', running time of 32 seconds
-    @podcast = FactoryGirl.create :podcast, podcast_file_name: 'edenlarge.mp3'
+    @podcast = FactoryGirl.create :podcast, podcast_file_name: 'piano-loop.mp3'
     @timestamp = @podcast.timestamps.build( start_time: 5, end_time: 20)
   end
 

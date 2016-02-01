@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :podcast do
     transient do
-      podcast_file_name "edenlarge.mp3"
+      podcast_file_name "piano-loop.mp3"
     end
 
     title "Example Podcast"

@@ -108,29 +108,29 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   end
 
   test "should return valid json filtered by above end_time length" do
-    get :index, { min_end_time: 32 }
+    get :index, { min_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.count, podcasts_response.count
-    get :index, { min_end_time: 33 }
+    get :index, { min_end_time: 87 }
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
 
   test "should return valid json filtered by below end_time length" do
-    get :index, { max_end_time: 32 }
+    get :index, { max_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.count, podcasts_response.count
-    get :index, { max_end_time: 31 }
+    get :index, { max_end_time: 85 }
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
 
   #TODO: add aditinal podcasts with different endimes for more through testing
   test "should return valid json filtered by multiple filters" do 
-    get :index, { min_end_time: 32, max_end_time: 32 }
+    get :index, { min_end_time: 86, max_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.count, podcasts_response.count
-    get :index, { min_end_time: 33, max_end_time: 35}
+    get :index, { min_end_time: 87, max_end_time: 89}
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
@@ -139,7 +139,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "create should return json errors when not logged in" do
     valid_podcast_attributes = { title: "New Podcast Name",
-                                 podcast_file: open_podcast_file('edenlarge.mp3') }
+                                 podcast_file: open_podcast_file('piano-loop.mp3') }
     assert_no_difference '@series.podcasts.count' do
       post :create, series_id: @series, podcast: valid_podcast_attributes
     end
@@ -153,7 +153,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   
   test "create should reutrn errors on invalid series_id" do
     valid_podcast_attributes = { title: "New Podcast Name",
-                                 podcast_file: open_podcast_file('edenlarge.mp3') }
+                                 podcast_file: open_podcast_file('piano-loop.mp3') }
     log_in_as @user
     assert_no_difference '@series.podcasts.count' do
       post :create, series_id: -1, podcast: valid_podcast_attributes
@@ -183,7 +183,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   test "create should return valid json on valid attributes with local auio file" do
     valid_podcast_attributes = { title: "New Podcast Name",
-                                 podcast_file: open_podcast_file('edenlarge.mp3') }
+                                 podcast_file: open_podcast_file('piano-loop.mp3') }
     log_in_as @user
     assert_difference '@series.podcasts.count', 1 do
       post :create, series_id: @series, podcast: valid_podcast_attributes

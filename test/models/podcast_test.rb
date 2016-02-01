@@ -5,7 +5,7 @@ class PodcastTest < ActiveSupport::TestCase
     @user = FactoryGirl.create :user_with_series
     @series = @user.series.first
     @podcast = @series.podcasts.build(title: "New Games Podcast",
-                                    podcast_file: fixture_file_upload('podcasts/edenlarge.mp3', 'audio/mpeg'))
+                                    podcast_file: fixture_file_upload('podcasts/piano-loop.mp3', 'audio/mpeg'))
   end
 
   # verify podcast metadata properly initialized
