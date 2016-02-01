@@ -11,7 +11,8 @@ class Api::V1::TimestampsController < ApplicationController
   end
 
   def index
-    @timestamps = Timestamp.search(params)
+    # return searched timestamps or an empty hash on no matches
+    @timestamps = Timestamp.search(timestamp_search_params) || []
     render json: @timestamps
   end
 
@@ -48,5 +49,9 @@ class Api::V1::TimestampsController < ApplicationController
     
     def timestamp_params
       params.require(:timestamp).permit(:start_time, :end_time)
+    end
+
+    def timestamp_search_params
+      params.permit(:podcast_id)
     end
 end

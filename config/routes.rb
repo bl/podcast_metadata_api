@@ -17,7 +17,7 @@ Rails.application.routes.draw do
       resources :podcasts,    only: [:show, :index, :create, :update, :destroy] do
         resources :timestamps,  only: [:index, :create]
       end
-      resources :timestamps,  only: [:show, :index, :update, :destroy]
+      resources :timestamps,  only: [:show, :update, :destroy]
       resources :articles,    only: [:show, :index, :create, :update, :destroy]
     end
   end

@@ -35,11 +35,11 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   # INDEX
 
-  test "index should return valid json on all timestamps" do
-    get :index
+  test "index should return empty timestamps list with invalid podcast_id param" do
+    get :index, {podcast_id: -1 }
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
-    assert_equal Timestamp.count, timestamp_response.count
+    assert_equal 0, timestamp_response.count
 
     assert_response 200
   end
