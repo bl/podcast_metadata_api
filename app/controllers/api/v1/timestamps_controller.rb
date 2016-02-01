@@ -41,7 +41,7 @@ class Api::V1::TimestampsController < ApplicationController
 
     def correct_timestamp
       @timestamp ||= Timestamp.find_by id: params[:id]
-      unless @timestamp && @timestamp.podcast.user == current_user
+      unless @timestamp && @timestamp.podcast.series.user == current_user
         render json: ErrorSerializer.serialize(timestamp: "is invalid"), status: 403
       end
     end

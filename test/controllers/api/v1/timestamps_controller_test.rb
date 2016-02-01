@@ -73,7 +73,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "create should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 5, end_time: 10 }
-    log_in_as @podcast_with_timestamps.user
+    log_in_as @podcast_with_timestamps.series.user
     assert_no_difference '@podcast.timestamps.count' do
       post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
     end
@@ -87,7 +87,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "create should return json errors on invalid attribtues" do
     invalid_timestamp_attributes = { start_time: 10, end_time: 5 }
-    log_in_as @podcast.user
+    log_in_as @podcast.series.user
     assert_no_difference '@podcast.timestamps.count' do
       post :create, podcast_id: @podcast, timestamp: invalid_timestamp_attributes
     end
@@ -101,7 +101,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "create should return valid json on valid attributes" do
     valid_timestamp_attributes = { start_time: 5, end_time: 10 }
-    log_in_as @podcast.user
+    log_in_as @podcast.series.user
     assert_difference '@podcast.timestamps.count', 1 do
       post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
     end
@@ -127,7 +127,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "update should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    log_in_as @podcast.user
+    log_in_as @podcast.series.user
     patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
     timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
@@ -139,7 +139,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "update should return json errors on invalid attributes" do
     invalid_timestamp_attributes = { start_time: @podcast_with_timestamps.end_time, end_time: nil }
-    log_in_as @podcast_with_timestamps.user
+    log_in_as @podcast_with_timestamps.series.user
     patch :update, id: @timestamps.first, timestamp: invalid_timestamp_attributes
     timestamp_errors = json_response[:Errors]
     assert_not_nil timestamp_errors
@@ -151,7 +151,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   test "update should return valid json on valid attributes" do
     valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    log_in_as @podcast_with_timestamps.user
+    log_in_as @podcast_with_timestamps.series.user
     patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
@@ -176,7 +176,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   end
 
   test "destroy should return json errors on invalid timestamp id" do
-    log_in_as @podcast_with_timestamps.user
+    log_in_as @podcast_with_timestamps.series.user
     assert_no_difference '@timestamps.count' do
       delete :destroy, id: -1
     end
@@ -189,7 +189,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   end
 
   test "destroy should return json errors on non-logged in user podcasts timestamp" do
-    log_in_as @podcast.user
+    log_in_as @podcast.series.user
     assert_no_difference '@timestamps.count' do
       delete :destroy, id: @timestamps.first
     end
@@ -202,7 +202,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   end
 
   test "destroy should return empty payload on valid timestamp destroy" do
-    log_in_as @podcast_with_timestamps.user
+    log_in_as @podcast_with_timestamps.series.user
     assert_difference '@timestamps.count', -1 do
       delete :destroy, id: @timestamps.first
     end
