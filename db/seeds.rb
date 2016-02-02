@@ -17,6 +17,14 @@
                password_confirmation: password)
 end
 
+# series
+# associate series with first 3 users
+3.times do |n|
+  3.times do |j|
+    User.all[n].series.create!(title: "Generic Series #{j}")
+  end
+end
+
 # podcasts
 # load podcasts from shared/seed_data/podcasts, associating each podcast with each user
 cur_podcast = 0
@@ -28,7 +36,7 @@ podcast_entries.each do |podcast_file|
 
   puts "Creating Podcast: #{title} from file: #{podcast_file}"
   # add each podcast to next user (repeat once users exhausted)
-  User.all[cur_podcast % User.count].podcasts.create!(title: title,
+  Series.all[cur_podcast % Series.count].podcasts.create!(title: title,
                                                    podcast_file: File.open( "#{seed_data_dir}/#{podcast_file}", "r"))
 
   cur_podcast += 1
