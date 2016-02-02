@@ -16,6 +16,12 @@
 # ignore server configuration files
 /shared/*
 
+# ignore environment specific configuration files
+config/settings*.yml
+config/settings/*
+#config/settings/*.local.yml
+config/environments/*.local.yml
+
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal

@@ -14,6 +14,8 @@ gem 'sqlite3'
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.1.0'
+# use railsconfig for yaml based configuration files to load environment specific settings
+gem 'config'
 # Use ActiveModel::Serializers to serialize ActiveModel/ActiveRecord objects
 # use version 0.10.x
 gem 'active_model_serializers', git: 'https://github.com/rails-api/active_model_serializers.git'
@@ -22,7 +24,8 @@ gem 'bcrypt', '~> 3.1.7'
 # used for reading audio file metadata tags
 gem 'taglib-ruby'
 # Carrierwave used for uploading podcast audio data
-gem 'carrierwave'
+# using master branch for most recent aws suppot
+gem 'carrierwave', git: 'https://github.com/carrierwaveuploader/carrierwave.git'
 # Puma used for hosting rails server
 gem 'puma'
 
@@ -44,5 +47,10 @@ group :development do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+end
+
+group :production do
+  # use fog-aws with carrierwave to host assets on amazon aws
+  gem 'fog-aws'
 end
 
