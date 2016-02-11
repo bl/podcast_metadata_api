@@ -25,7 +25,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
 
   test "show should return json errors on invalid series id get" do
     get :show, id: -1
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
@@ -64,7 +64,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_no_difference '@user.series.count' do
       post :create, series: valid_series_attributes
     end
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /user/, series_errors.first[:id].to_s
     assert_match /not authenticated/, series_errors.first[:detail].to_s
@@ -94,7 +94,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_no_difference '@user.series.count' do
       post :create, series: invalid_series_attributes
     end
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /title/, series_errors.first[:id].to_s
     assert_match /can't be blank/, series_errors.first[:detail].to_s
@@ -121,7 +121,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
   test "update should return json errors when not logged-in" do
     valid_series_attributes = { title: "new title", description: "new description" }
     patch :update, id: @series.first, series: valid_series_attributes
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /user/, series_errors.first[:id].to_s
     assert_match /not authenticated/, series_errors.first[:detail].to_s
@@ -133,7 +133,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     valid_series_attributes = { title: "new title", description: "new description" }
     log_in_as @user
     patch :update, id: @series.first, series: valid_series_attributes
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
@@ -145,7 +145,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     valid_series_attributes = { title: "new title", description: "new description" }
     log_in_as @user_with_series
     patch :update, id: -1, series: valid_series_attributes
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
@@ -157,7 +157,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     invalid_series_attributes = { title: " ", description: "new description" }
     log_in_as @user_with_series
     patch :update, id: @series.first, series: invalid_series_attributes
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /title/, series_errors.first[:id].to_s
     assert_match /can't be blank/, series_errors.first[:detail].to_s
@@ -182,7 +182,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_no_difference '@series.count' do
       delete :destroy, id: @series.first
     end
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /user/, series_errors.first[:id].to_s
     assert_match /not authenticated/, series_errors.first[:detail].to_s
@@ -195,7 +195,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_no_difference '@series.count' do
       delete :destroy, id: -1
     end
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
@@ -208,7 +208,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_no_difference '@series.count' do
       delete :destroy, id: @series.first
     end
-    series_errors = json_response[:Errors]
+    series_errors = json_response[:errors]
     assert_not_nil series_errors
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s

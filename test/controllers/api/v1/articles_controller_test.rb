@@ -28,7 +28,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
 
   test "get should return json errors on invalid article id" do
     get :show, id: -1
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
@@ -68,7 +68,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@user.articles.count' do
       post :create, article: valid_article_attributes
     end
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /user/, article_errors.first[:id].to_s
     assert_match /not authenticated/, article_errors.first[:detail].to_s
@@ -96,7 +96,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@user.articles.count' do
       post :create, article: invalid_article_attributes
     end
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /content/, article_errors.first[:id].to_s
     assert_match /can't be blank/, article_errors.first[:detail].to_s
@@ -122,7 +122,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   test "update should return json errors when nog logged-in" do
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     patch :update, id: @articles.first, article: valid_article_attributes
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /user/, article_errors.first[:id].to_s
     assert_match /not authenticated/, article_errors.first[:detail].to_s
@@ -134,7 +134,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     log_in_as @user
     patch :update, id: @articles.first, article: valid_article_attributes
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
@@ -146,7 +146,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     valid_article_attributes = { content: "Valid text content\n newline, <p>html tags</p>" }
     log_in_as @user_with_articles
     patch :update, id: -1, article: valid_article_attributes
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
@@ -158,7 +158,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     invalid_article_attributes = { content: " " }
     log_in_as @user_with_articles
     patch :update, id: @articles.first, article: invalid_article_attributes
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /content/, article_errors.first[:id].to_s
     assert_match /can't be blank/, article_errors.first[:detail].to_s
@@ -184,7 +184,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@articles.count' do
       delete :destroy, id: @articles.first
     end
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /user/, article_errors.first[:id].to_s
     assert_match /not authenticated/, article_errors.first[:detail].to_s
@@ -197,7 +197,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@articles.count' do
       delete :destroy, id: -1
     end
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
     assert_not_nil article_errors
@@ -210,7 +210,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@articles.count' do
       delete :destroy, id: @articles.first
     end
-    article_errors = json_response[:Errors]
+    article_errors = json_response[:errors]
     assert_not_nil article_errors
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s

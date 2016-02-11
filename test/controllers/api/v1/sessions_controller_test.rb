@@ -13,7 +13,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     invalid_login_attributes = { email:     "invalid_email.com",
                                  password:  "password" }
     post :create, session: invalid_login_attributes
-    session_response = json_response[:Errors]
+    session_response = json_response[:errors]
     assert_not_nil session_response
     assert_match /email_password/, session_response.first[:id].to_s
     assert_match /is invalid/, session_response.first.to_s
@@ -23,7 +23,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     valid_login_attributes = { email:     @non_activated_user.email,
                                password:  "password" }
     post :create, session: valid_login_attributes
-    session_response = json_response[:Errors]
+    session_response = json_response[:errors]
     assert_not_nil session_response
     assert_match /user/, session_response.first[:id].to_s
     assert_match /has not been activated/, session_response.first.to_s

@@ -27,7 +27,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on invalid user id get" do
     get :show, id: -1
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first[:detail].to_s
@@ -65,7 +65,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       post :create, user: invalid_user_attributes
     end
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /email/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first[:detail].to_s
@@ -88,7 +88,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "update should return authorization error when not logged in" do
     update_user_attributes = { name: "New Name" }
     patch :update, id: @user, user: update_user_attributes
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /not authenticated/, user_errors.first.to_s
@@ -100,7 +100,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     update_user_attributes = { email: "new_email@example.com" }
     log_in_as @user
     patch :update, id: -1, user: update_user_attributes
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
@@ -112,7 +112,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     update_user_attributes = { email: "new_email@example.com" }
     log_in_as @user
     patch :update, id: @other_user, user: update_user_attributes
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
@@ -154,7 +154,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       delete :destroy, id: @user
     end
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /not authenticated/, user_errors.first.to_s
@@ -167,7 +167,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       delete :destroy, id: -1
     end
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
@@ -180,7 +180,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       delete :destroy, id: @other_user
     end
-    user_errors = json_response[:Errors]
+    user_errors = json_response[:errors]
     assert_not_nil user_errors
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
