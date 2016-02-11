@@ -2,8 +2,9 @@ require 'test_helper'
 
 class Api::V1::SessionsControllerTest < ActionController::TestCase
   def setup
-    @user = FactoryGirl.create :user
+    @user = FactoryGirl.create :activated_user
     include_default_accept_headers
+    @non_activated_user = (FactoryGirl.create :user)
   end
 
   # CREATE
@@ -16,6 +17,16 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     assert_not_nil session_response
     assert_match /email_password/, session_response.first[:id].to_s
     assert_match /is invalid/, session_response.first.to_s
+  end
+
+  test "should return json errors on login on non activated user" do
+    valid_login_attributes = { email:     @non_activated_user.email,
+                               password:  "password" }
+    post :create, session: valid_login_attributes
+    session_response = json_response[:Errors]
+    assert_not_nil session_response
+    assert_match /user/, session_response.first[:id].to_s
+    assert_match /has not been activated/, session_response.first.to_s
   end
 
   test "should return valid json on valid user login" do

@@ -88,4 +88,10 @@ class UserTest < ActiveSupport::TestCase
     @user.password = @user.password_confirmation = "123456"
     assert @user.valid?
   end
+
+  # acivated
+
+  test "activated should be false by default" do
+    assert_not @user.activated?
+  end
 end

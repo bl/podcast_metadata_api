@@ -2,7 +2,7 @@ FactoryGirl.define do
   factory :series do
     title { FFaker::HipsterIpsum.words(3) }
     published false
-    user
+    association :user, factory: :activated_user
   end
 
   factory :series_with_podcasts do

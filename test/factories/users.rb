@@ -5,7 +5,15 @@ FactoryGirl.define do
     password              "password"
     password_confirmation "password"
 
-    factory :user_with_series do
+    trait :activated do
+      auth_token { User.new_token }
+      activated true
+      activated_at { Time.zone.now }
+    end
+
+    factory :activated_user, traits: [:activated]
+
+    factory :user_with_series, parent: :activated_user do
       transient do
         series_count 3
       end
@@ -15,7 +23,7 @@ FactoryGirl.define do
       end
     end
 
-    factory :user_with_articles do
+    factory :user_with_articles, parent: :activated_user do
       transient do
         articles_count 3
       end

@@ -13,8 +13,9 @@ class ApplicationController < ActionController::API
     user == current_user
   end
 
+  # user is logged in if they exist and are activated
   def logged_in?
-    !current_user.nil?
+    !current_user.nil? && current_user.activated?
   end
 
   private
@@ -26,6 +27,7 @@ class ApplicationController < ActionController::API
     
     def  logged_in_user
       render json: ErrorSerializer.serialize(user: "not authenticated"),
-             status: :unauthorized unless logged_in?
+             status: :unauthorized and return unless !current_user.nil?
+      render json: ErrorSerializer.serialize(user: "has not been activated"), status: 422 unless current_user.activated?
     end
 end

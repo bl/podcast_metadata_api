@@ -5,10 +5,10 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   def setup
     # create additional data, verify more than record in db
     5.times do
-      FactoryGirl.create :user
+      FactoryGirl.create :activated_user
     end
-    @user = FactoryGirl.create :user
-    @other_user = FactoryGirl.create :user
+    @user = FactoryGirl.create :activated_user
+    @other_user = FactoryGirl.create :activated_user
     @user_with_series = FactoryGirl.create :user_with_series
     include_default_accept_headers
   end
@@ -78,9 +78,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_difference 'User.count', 1 do
       post :create, user: valid_user_attributes
     end
-    user_response = json_response[:data]
-    assert_not_nil user_response
-    assert_equal valid_user_attributes[:email], user_response[:attributes][:email]
+    assert_empty response.body
     
     assert_response 201
   end

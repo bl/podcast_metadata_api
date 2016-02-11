@@ -12,7 +12,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     @articles = @user_with_articles.articles
 
     # user without articles
-    @user = FactoryGirl.create :user
+    @user = FactoryGirl.create :activated_user
   end
 
   # SHOW

@@ -1,8 +1,10 @@
 class User < ActiveRecord::Base
+  attr_accessor :activation_token
   before_save   :downcase_email
   # create auth_token on user create
-  #   allows for making API calls right after creation without needing to log-in
+  #   token created, but not usable until user activated
   before_create :create_auth_token
+  before_create :create_activation_digest
 
   has_many :series,   dependent: :destroy
   has_many :podcasts, through: :series
@@ -23,12 +25,14 @@ class User < ActiveRecord::Base
                        allow_nil: true
   validates :auth_token,  uniqueness: true
 
+  # create an auth token (that does't conflict any existing ones)
   def create_auth_token
     begin
       self.auth_token = User.new_token
     end while self.class.exists?(auth_token: self.auth_token)
   end
 
+  # clear the auth token
   def clear_auth_token
     self.auth_token = nil
   end
@@ -45,6 +49,11 @@ class User < ActiveRecord::Base
     SecureRandom.urlsafe_base64
   end
 
+  # activate the current user
+  def activate
+    update_columns(activated: true, activated_at: Time.zone.now, activation_digest: nil)
+  end
+
   # generate bcrypt digest from input string
   def User.digest(input)
     cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
@@ -57,5 +66,10 @@ class User < ActiveRecord::Base
     # downcase user email
     def downcase_email
       self.email.downcase!
+    end
+
+    def create_activation_digest
+      self.activation_token  = User.new_token
+      self.activation_digest = User.digest(activation_token)
     end
 end

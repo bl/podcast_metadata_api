@@ -6,7 +6,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     2.times do
       FactoryGirl.create :user_with_series
     end
-    @user = FactoryGirl.create :user
+    @user = FactoryGirl.create :activated_user
     @user_with_series = FactoryGirl.create :user_with_series
     @series = @user_with_series.series
     include_default_accept_headers

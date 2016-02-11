@@ -39,7 +39,7 @@ class Api::V1::ArticlesController < ApplicationController
   private
 
     def article_params
-      params.require('article').permit('content')
+      params.require(:article).permit(:content)
     end
 
     def correct_article

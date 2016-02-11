@@ -1,15 +1,11 @@
 class Api::V1::SessionsController < ApplicationController
+  before_action :authenticated_user, only: [:create]
+  before_action :activated_user,     only: [:create]
 
   def create
-    @user = User.find_by email: params[:session][:email]
-    if @user && @user.authenticated?(:password, params[:session][:password])
-      # generate new auth_token on valid log-in
-      @user.create_auth_token
-      @user.save
-      render json: @user, serializer: UserAuthSerializer, status: 200
-    else
-      render json: ErrorSerializer.serialize(email_password: "is invalid"), status: 422
-    end
+    @user.create_auth_token
+    @user.save
+    render json: @user, serializer: UserAuthSerializer, status: 200
   end
 
   def destroy
@@ -23,4 +19,18 @@ class Api::V1::SessionsController < ApplicationController
       head 204
     end
   end
+
+  private
+    def authenticated_user
+      @user ||= User.find_by email: params[:session][:email]
+      unless @user && @user.authenticated?(:password, params[:session][:password])
+        render json: ErrorSerializer.serialize(email_password: "is invalid"), status: 422
+      end
+    end
+
+    def activated_user
+      unless @user.activated?
+        render json: ErrorSerializer.serialize(user: "has not been activated"), status: 422
+      end
+    end
 end

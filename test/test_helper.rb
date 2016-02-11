@@ -20,9 +20,9 @@ class ActiveSupport::TestCase
   def create_session_for(user, options = {})
     password = options[:password] || 'password'
     if integration_test?
-      create sessions_path, session: { email:    user.email,
-                                       password: password }
-      json_response[:auth_token]
+      post api_sessions_path, session: { email:    user.email,
+                                           password: password }
+      json_response[:data][:attributes][:auth_token]
     else
       user.create_auth_token
       user.save
