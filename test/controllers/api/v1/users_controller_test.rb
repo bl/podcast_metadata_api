@@ -46,11 +46,14 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   # INDEX
   
-  test "should return valid json on all users" do
+  test "should return valid json on all activated users" do
+    # create non-activated user
+    non_activated_user = FactoryGirl.create :user
     get :index
     user_response = json_response[:data]
     assert_not_nil user_response
-    assert_equal User.all.count, user_response.count
+    assert_equal User.where(activated: true).count, user_response.count
+    assert_not User.where(activated: true).include? non_activated_user
     
     assert_response 200
   end

@@ -10,7 +10,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def index
-    @users = User.all
+    @users = User.where(activated: true)
     render json: @users
   end
 
