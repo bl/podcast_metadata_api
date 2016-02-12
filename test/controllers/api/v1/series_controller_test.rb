@@ -30,7 +30,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   # INDEX
@@ -138,7 +138,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors when using invalid series id" do
@@ -150,7 +150,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors on invalid attributes" do
@@ -200,7 +200,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
   
-    assert_response 403
+    assert_response 422
   end
 
   test "should return json errors on deleting non-logged in users series" do
@@ -213,7 +213,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
     assert_match /series/, series_errors.first[:id].to_s
     assert_match /is invalid/, series_errors.first[:detail].to_s
   
-    assert_response 403
+    assert_response 422
   end
 
   test "should return empty payload on valid series destroy" do

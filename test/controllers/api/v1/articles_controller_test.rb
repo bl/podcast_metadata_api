@@ -33,7 +33,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   # INDEX
@@ -139,7 +139,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors when using invalid podcast id" do
@@ -151,7 +151,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors on invalid attributes" do
@@ -202,7 +202,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_match /is invalid/, article_errors.first[:detail].to_s
     assert_not_nil article_errors
 
-    assert_response 403
+    assert_response 422
   end
 
   test "destroy should return json errors on deleting non-logged in users article" do
@@ -215,7 +215,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_match /article/, article_errors.first[:id].to_s
     assert_match /is invalid/, article_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "destroy should return empty payload on valid article" do

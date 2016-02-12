@@ -32,7 +32,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "should return user json and series relationship on valid user get" do
@@ -108,7 +108,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   test "should return json errors on other user id update" do
@@ -120,7 +120,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   test "should return valid json on valid user update" do
@@ -175,7 +175,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   test "should return json errors on other user id destroy" do
@@ -188,7 +188,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_match /user/, user_errors.first[:id].to_s
     assert_match /is invalid/, user_errors.first.to_s
     
-    assert_response 403
+    assert_response 422
   end
   
   test "should return empty payload on valid user destroy" do

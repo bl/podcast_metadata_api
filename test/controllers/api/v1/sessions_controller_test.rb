@@ -17,6 +17,8 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     assert_not_nil session_response
     assert_match /email_password/, session_response.first[:id].to_s
     assert_match /is invalid/, session_response.first.to_s
+
+    assert_response 422
   end
 
   test "should return json errors on login on non activated user" do
@@ -27,6 +29,8 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     assert_not_nil session_response
     assert_match /user/, session_response.first[:id].to_s
     assert_match /has not been activated/, session_response.first.to_s
+
+    assert_response 403
   end
 
   test "should return valid json on valid user login" do
@@ -39,6 +43,8 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     @user.reload
     assert_equal @user.auth_token, session_response[:attributes][:auth_token]
     assert_not_equal old_token, @user.auth_token
+
+    assert_response 200
   end
 
   # DESTROY 
@@ -49,6 +55,8 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
     delete :destroy, id: @user.auth_token
     assert_empty response.body
     assert_nil @user.reload.auth_token
+
+    assert_response 204
   end
 
 # disabled rendering failure on session destroy action

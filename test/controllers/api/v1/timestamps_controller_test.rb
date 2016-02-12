@@ -30,7 +30,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_match /timestamp/, timestamp_errors.first[:id].to_s
     assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   # INDEX
@@ -82,7 +82,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_match /podcast/, timestamp_errors.first[:id].to_s
     assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "create should return json errors on invalid attribtues" do
@@ -134,7 +134,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_match /timestamp/, timestamp_errors.first[:id].to_s
     assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors on invalid attributes" do
@@ -185,7 +185,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_match /timestamp/, timestamp_errors.first[:id].to_s
     assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "destroy should return json errors on non-logged in user podcasts timestamp" do
@@ -198,7 +198,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_match /timestamp/, timestamp_errors.first[:id].to_s
     assert_match /is invalid/, timestamp_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "destroy should return empty payload on valid timestamp destroy" do

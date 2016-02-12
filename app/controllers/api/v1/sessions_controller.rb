@@ -12,7 +12,7 @@ class Api::V1::SessionsController < ApplicationController
     @user = User.find_by auth_token: params[:id]   
     #TODO:  disabled rendering failure on destroy to possibly prevent continuous
     #       calls to destroy until a valid response
-    #       render json: { errors: "Invalid user" }, status: 403 and return unless @user
+    #       render json: { errors: "Invalid user" }, status: 422 and return unless @user
     if @user
       @user.clear_auth_token
       @user.save
@@ -30,7 +30,7 @@ class Api::V1::SessionsController < ApplicationController
 
     def activated_user
       unless @user.activated?
-        render json: ErrorSerializer.serialize(user: "has not been activated"), status: 422
+        render json: ErrorSerializer.serialize(user: "has not been activated"), status: 403
       end
     end
 end

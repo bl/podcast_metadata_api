@@ -4,7 +4,7 @@ class Api::V1::SeriesController < ApplicationController
 
   def show
     @series = Series.find_by id: params[:id] 
-    render json: ErrorSerializer.serialize(series: "is invalid"), status: 403 and return unless @series
+    render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 and return unless @series
 
     render json: @series
   end
@@ -44,6 +44,6 @@ class Api::V1::SeriesController < ApplicationController
 
     def correct_series
       @series ||= current_user.series.find_by id: params[:id]
-      render json: ErrorSerializer.serialize(series: "is invalid"), status: 403 unless @series
+      render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 unless @series
     end
 end

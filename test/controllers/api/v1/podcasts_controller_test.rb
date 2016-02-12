@@ -45,7 +45,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /podcast/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   # INDEX
@@ -163,7 +163,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /series/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
 
-    assert_response 403
+    assert_response 422
   end
 
   test "create should return errors on invalid attribute" do
@@ -230,7 +230,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /podcast/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors when using invalid podcast id" do
@@ -242,7 +242,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /podcast/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
     
-    assert_response 403
+    assert_response 422
   end
 
   test "update should return json errors on invalid attributes" do
@@ -293,7 +293,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /podcast/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
   
-    assert_response 403
+    assert_response 422
   end
 
   test "should return json errors on deleting non-logged in users podcast" do
@@ -306,7 +306,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     assert_match /podcast/, podcast_errors.first[:id].to_s
     assert_match /is invalid/, podcast_errors.first[:detail].to_s
   
-    assert_response 403
+    assert_response 422
   end
 
   test "should return empty payload on valid podcast destroy" do
