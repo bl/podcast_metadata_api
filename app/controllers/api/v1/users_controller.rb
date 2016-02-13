@@ -4,7 +4,7 @@ class Api::V1::UsersController < ApplicationController
 
   def show
     @user = User.find_by id: params[:id] 
-    render json: ErrorSerializer.serialize(user: "is invalid"), status: 422 and return unless @user
+    render json: ErrorSerializer.serialize(user: "is invalid"), status: 422 and return unless @user && @user.activated?
 
     render json: @user
   end
