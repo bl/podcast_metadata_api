@@ -1,0 +1,12 @@
+<h1>UserMailer#account_activation</h1>
+<p>Hello <%= @user.name %></p>
+
+<p>
+  Thanks for registering at podcastfor.me
+</p>
+
+<p>
+  Click the link below to complete your registration:
+</p>
+
+<%= link_to "Activate", edit_api_account_activation_url(@user.activation_token, email: @user.email) %>

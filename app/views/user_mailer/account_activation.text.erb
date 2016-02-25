@@ -1,0 +1,7 @@
+UserMailer#account_activation
+
+Thanks for registering at podcastfor.me
+
+Click the link below to complete your registration:
+
+<%= edit_api_account_activation_url(@user.activation_token, email: @user.email) %>

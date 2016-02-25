@@ -18,8 +18,7 @@ class Api::V1::UsersController < ApplicationController
     @user = User.new(user_params)
     # create user, but keep activated? false
     if @user.save
-      #render json: @user, status: 201
-      #TODO: send email
+      @user.send_activation_email
       head 201
     else
       render json: ErrorSerializer.serialize(@user.errors), status: 422

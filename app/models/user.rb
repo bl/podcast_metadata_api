@@ -49,6 +49,18 @@ class User < ActiveRecord::Base
     SecureRandom.urlsafe_base64
   end
 
+  # update activation digest with new token
+  #   ie sending another account activation email
+  def update_activation_digest
+    create_activation_digest
+    save
+  end
+
+  # deliver an activation email to the user's email
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
   # activate the current user
   def activate
     update_columns(activated: true, activated_at: Time.zone.now, activation_digest: nil)

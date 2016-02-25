@@ -11,7 +11,7 @@ Rails.application.routes.draw do
         resources :articles,            only: [:index]
       end
       resources :sessions,            only: [:create, :destroy]
-      resources :account_activations, only: [:edit]
+      resources :account_activations, only: [:create, :edit]
       resources :series,              only: [:show, :index, :create, :update, :destroy] do
         resources :podcasts,            only: [:index, :create]
       end

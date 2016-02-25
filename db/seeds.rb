@@ -6,7 +6,7 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-# users
+# users (first user inactivated, rest activated)
 10.times do |n|
   name = FFaker::Name.name
   email = "user-#{n}@example.com"
@@ -15,7 +15,7 @@
                email: email,
                password:              password,
                password_confirmation: password,
-               activated: true,
+               activated: (n == 0 ? false : true),
                activated_at: Time.zone.now )
 end
 
@@ -23,7 +23,7 @@ end
 # associate series with first 3 users
 3.times do |n|
   3.times do |j|
-    User.all[n].series.create!(title: "Generic Series #{j}")
+    User.where(activated: true)[n].series.create!(title: "Generic Series #{j}")
   end
 end
 
@@ -46,7 +46,7 @@ end
 
 # articles
 # create articles for each user
-User.all.each do |user|
+User.where(activated: true).each do |user|
   3.times do
     user.articles.create!(content: FFaker::BaconIpsum.paragraphs)
   end
