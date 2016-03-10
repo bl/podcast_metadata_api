@@ -58,7 +58,7 @@ class User < ActiveRecord::Base
 
   # deliver an activation email to the user's email
   def send_activation_email
-    UserMailer.account_activation(self).deliver_now
+    UserMailer.account_activation(self).deliver_later
   end
 
   # activate the current user

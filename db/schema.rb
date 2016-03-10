@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160203222019) do
+ActiveRecord::Schema.define(version: 20160226123222) do
 
   create_table "articles", force: :cascade do |t|
     t.text     "content"
@@ -71,6 +71,8 @@ ActiveRecord::Schema.define(version: 20160203222019) do
     t.string   "activation_digest"
     t.boolean  "activated",         default: false
     t.datetime "activated_at"
+    t.string   "reset_digest"
+    t.datetime "reset_at"
   end
 
   add_index "users", ["auth_token"], name: "index_users_on_auth_token", unique: true
