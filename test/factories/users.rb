@@ -23,7 +23,7 @@ FactoryGirl.define do
       end
     end
 
-    factory :user_with_articles, parent: :activated_user do
+    factory :user_with_unpublished_articles, parent: :activated_user do
       transient do
         articles_count 3
       end

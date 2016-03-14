@@ -58,6 +58,18 @@ class ActiveSupport::TestCase
     api_response_format
   end
 
+  # create published article on article_user to podcast
+  def create_published_article(podcast, article_user)
+    article = article_user.articles.create(FactoryGirl.attributes_for :article)
+    # create timestamp attributes associated with article above
+    timestamp_attributes = (FactoryGirl.attributes_for :timestamp, podcast_end_time: podcast.end_time).merge article_id: article.id
+    timestamp = podcast.timestamps.create(timestamp_attributes)
+    # publish article
+    article.update published: true, published_at: Time.zone.now
+
+    article
+  end
+
   private
 
     def integration_test?

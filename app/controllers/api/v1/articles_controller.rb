@@ -6,10 +6,21 @@ class Api::V1::ArticlesController < ApplicationController
     @article = Article.find_by id: params[:id]
     render json: ErrorSerializer.serialize(article: "is invalid"), status: 422 and return unless @article
 
+    # display unpublished article only if logged_in user is the owner
+    unless @article.published || (!@article.published && logged_in? && current_user.articles.exists?(@article.id))
+      render json: ErrorSerializer.serialize(article: "is invalid"), status: 422 and return
+    end
+
     render json: @article
   end
 
   def index
+
+    # only logged in users viewing their own podcasts can search unpublished
+    unless logged_in? && params[:user_id].present? && current_user.id == params[:user_id].to_i
+      params.merge! published: true
+    end
+
     @articles = Article.search(params)
     render json: @articles
   end

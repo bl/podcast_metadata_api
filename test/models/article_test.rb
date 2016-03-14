@@ -33,11 +33,21 @@ class ArticleTest < ActiveSupport::TestCase
   # published
 
   test "should not be published when timestamp is not present" do
-    @article.published = true
+    @article.publish
     @series_with_podcasts.podcasts.each do |podcast|
       podcast.timestamps.each {|timestamp| timestamp.update_attribute :article, nil}
     end
     assert_not @article.valid?
     assert_match /Article cannot be published without an associated timestamp/, @article.errors[:base].to_s
+  end
+
+  # published_at
+  test "published_at should be nil by default" do
+    assert_nil @article.published_at
+  end
+
+  test "published_at should be valid on published article" do
+    @article.publish
+    assert_not_nil @article.published_at
   end
 end

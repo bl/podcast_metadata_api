@@ -226,7 +226,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   end
 
   test "destroy should destroy all dependent articles" do
-    user_with_articles = FactoryGirl.create :user_with_articles
+    user_with_articles = FactoryGirl.create :user_with_unpublished_articles
     articles = user_with_articles.articles
     log_in_as user_with_articles
     assert_difference 'User.count', -1 do
