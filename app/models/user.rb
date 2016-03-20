@@ -10,6 +10,9 @@ class User < ActiveRecord::Base
   has_many :podcasts, through: :series
   has_many :articles, foreign_key: 'author_id', 
                       dependent: :destroy
+  has_many :published_articles, -> { where published: true },
+                      class_name: 'Article', foreign_key: 'author_id',
+                      dependent: :destroy
 
   # valid email regex
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i

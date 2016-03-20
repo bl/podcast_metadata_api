@@ -19,7 +19,12 @@ Rails.application.routes.draw do
         resources :timestamps,          only: [:index, :create]
       end
       resources :timestamps,          only: [:show, :update, :destroy]
-      resources :articles,            only: [:show, :index, :create, :update, :destroy]
+      resources :articles,            only: [:show, :index, :create, :update, :destroy] do
+        member do
+          post :publish
+          delete :unpublish
+        end
+      end
     end
   end
 end

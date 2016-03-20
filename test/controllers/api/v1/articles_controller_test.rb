@@ -5,12 +5,12 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   def setup
     # create additional data
     # create podcast to publish articles to
-    podcast = FactoryGirl.create :podcast
+    @podcast = FactoryGirl.create :podcast
     # create published articles associated to timestamps for the podcast above
     2.times do
       user = FactoryGirl.create :activated_user
       2.times do
-        create_published_article podcast, user
+        create_published_article @podcast, user
       end
     end
 
@@ -18,7 +18,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     @user_with_articles = FactoryGirl.create :activated_user
     @articles = @user_with_articles.articles
     2.times do
-      create_published_article podcast, @user_with_articles
+      create_published_article @podcast, @user_with_articles
       # create unpublished article
       @articles.create (FactoryGirl.attributes_for :article)
     end
@@ -114,7 +114,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   test "index should return published on published flag user articles on valid user_id and logged in user" do
     log_in_as @user_with_articles
     get :index, { user_id: @user_with_articles.id, published: true }
-    published_articles = @user_with_articles.articles.where(published: true)
+    published_articles = @user_with_articles.published_articles
     articles_response = json_response[:data]
     assert_not_nil articles_response
     assert_equal published_articles.count, articles_response.count
@@ -129,7 +129,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   test "index should return published user articles on valid user_id and logged in non-owner" do
     log_in_as @user
     get :index, { user_id: @user_with_articles.id }
-    published_articles = @user_with_articles.articles.where(published: true)
+    published_articles = @user_with_articles.published_articles
     articles_response = json_response[:data]
     assert_not_nil articles_response
     assert_equal published_articles.count, articles_response.count
@@ -144,7 +144,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   test "index should ignore published flag with user articles on valid user_id and logged in non-owner" do
     log_in_as @user
     get :index, { user_id: @user_with_articles.id, published: false }
-    published_articles = @user_with_articles.articles.where(published: true)
+    published_articles = @user_with_articles.published_articles
     articles_response = json_response[:data]
     assert_not_nil articles_response
     assert_equal published_articles.count, articles_response.count
@@ -158,7 +158,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
 
   test "index should return published user articles on valid user_id" do
     get :index, { user_id: @user_with_articles.id }
-    published_articles = @user_with_articles.articles.where(published: true)
+    published_articles = @user_with_articles.published_articles
     articles_response = json_response[:data]
     assert_not_nil articles_response
     assert_equal published_articles.count, articles_response.count
@@ -228,38 +228,132 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_response 201
   end
 
-  ## BEGIN ARTICLE_ID/PUBLISH
+  # PUBLISH
+
+  test "publish should return json errors when not logged-in" do
+    article = @unpublished_articles.first
+    create_article_timestamp(@podcast, article)
+    assert_no_difference '@user_with_unpublished_articles.published_articles.count' do
+      post :publish, id: article
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /user/, article_errors.first[:id].to_s
+    assert_match /not authenticated/, article_errors.first[:detail].to_s
+
+    assert_response :unauthorized
+  end
+
+  test "should return json errors when publishing non-logged users article" do
+    log_in_as @user
+    article = @unpublished_articles.first
+    create_article_timestamp(@podcast, article)
+    assert_no_difference '@user_with_unpublished_articles.published_articles.count' do
+      post :publish, id: article
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /article/, article_errors.first[:id].to_s
+    assert_match /is invalid/, article_errors.first[:detail].to_s
+
+    assert_response 422
+  end
+
+  test "should return json errors when publishing already published article" do
+    log_in_as @user_with_articles
+    article = @articles.first
+    post :publish, id: article
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /article/, article_errors.first[:id].to_s
+    assert_match /is already published/, article_errors.first[:detail].to_s
+
+    assert_response 422
+  end
+
+  test "should return json errors when publishing incomplete article" do
+    log_in_as @user_with_unpublished_articles
+    article = @unpublished_articles.first
+    assert_no_difference '@user_with_unpublished_articles.published_articles.count' do
+      post :publish, id: article
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /base/, article_errors.first[:id].to_s
+    assert_match /Article cannot be published without an associated timestamp/, article_errors.first[:detail].to_s
+
+    assert_response 422
+  end
+
+  test "publish should return valid json on valid article id" do
+    log_in_as @user_with_unpublished_articles
+    article = @unpublished_articles.first
+    create_article_timestamp(@podcast, article)
+    assert_difference '@user_with_unpublished_articles.published_articles.count', 1 do
+      post :publish, id: article
+    end
+    article_response = json_response[:data]
+    assert_not_nil article_response
+    assert article_response[:attributes][:published]
+
+    assert_response 200
+  end
+
+  # UNPUBLISH
   
-  # CREATE
-  test "publish create should return json errors when not logged-in" do
-    #TODO: post :create
-    assert_not true
+  test "unpublish should return json errors when not logged-in" do
+    article = @articles.first
+    assert_no_difference '@user_with_articles.published_articles.count' do
+      delete :unpublish, id: article
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /user/, article_errors.first[:id].to_s
+    assert_match /not authenticated/, article_errors.first[:detail].to_s
+
+    assert_response :unauthorized
   end
 
-  test "create should return json errors when publish non-logged users article" do
-    assert_not true
+  test "should return json errors when unpublish non-logged users article" do
+    log_in_as @user
+    article = @articles.first
+    assert_no_difference '@user_with_articles.published_articles.count' do
+      delete :unpublish, id: article
+    end
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /article/, article_errors.first[:id].to_s
+    assert_match /is invalid/, article_errors.first[:detail].to_s
+
+    assert_response 422
   end
 
-  test "publish create should return valid json on valid article id" do
-    assert_not true
+  test "should return json errors when unpublishing an unpublished article" do
+    log_in_as @user_with_unpublished_articles
+    article = @unpublished_articles.first
+    delete :unpublish, id: article
+    article_errors = json_response[:errors]
+    assert_not_nil article_errors
+    assert_match /article/, article_errors.first[:id].to_s
+    assert_match /is already unpublished/, article_errors.first[:detail].to_s
+
+    assert_response 422
   end
 
-  # DESTROY
-  
-  test "publish destroy should return json errors when not logged-in" do
-    assert_not true
+  test "unpublish should return valid json on valid article id" do
+    log_in_as @user_with_articles
+    article = @articles.first
+    assert_difference '@user_with_articles.published_articles.count', -1 do
+      delete :unpublish, id: article
+    end
+    article_response = json_response[:data]
+    assert_not_nil article_response
+    assert_not article.reload.published
+    assert_not article_response[:attributes][:published]
+
+    assert_response 200
   end
 
-  test "destroy should return json errors when publish non-logged users article" do
-    assert_not true
-  end
-
-  test "publish destroy should return empty payload on valid article id" do
-    assert_not true
-  end
-  
-  ## END ARTICLE_ID/PUBLISH
-  
   # UPDATE
 
   test "update should return json errors when not logged-in" do

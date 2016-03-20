@@ -30,8 +30,9 @@ class Article < ActiveRecord::Base
     articles
   end
 
+  # publish article if valid. executes validators
   def publish
-    update_columns(published: true, published_at: Time.zone.now)
+    update(published: true, published_at: Time.zone.now)
   end
 
   def unpublish

@@ -1,6 +1,6 @@
 class Api::V1::ArticlesController < ApplicationController
-  before_action :logged_in_user,  only: [:create, :update, :destroy]
-  before_action :correct_article, only: [:update, :destroy]
+  before_action :logged_in_user,  only: [:create, :publish, :unpublish, :update, :destroy]
+  before_action :correct_article, only: [:publish, :unpublish, :update, :destroy]
 
   def show
     @article = Article.find_by id: params[:id]
@@ -15,7 +15,6 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def index
-
     # only logged in users viewing their own podcasts can search unpublished
     unless logged_in? && params[:user_id].present? && current_user.id == params[:user_id].to_i
       params.merge! published: true
@@ -32,6 +31,23 @@ class Api::V1::ArticlesController < ApplicationController
     else
       render json: ErrorSerializer.serialize(@article.errors), status: 422
     end
+  end
+
+  def publish
+    render json: ErrorSerializer.serialize(article: "is already published"), status: 422 and return if @article.published
+
+    if @article.publish
+      render json: @article, status: 200
+    else
+      render json: ErrorSerializer.serialize(@article.errors), status: 422
+    end
+  end
+
+  def unpublish
+    render json: ErrorSerializer.serialize(article: "is already unpublished"), status: 422 and return unless @article.published
+
+    @article.unpublish
+    render json: @article, status: 200
   end
 
   def update
