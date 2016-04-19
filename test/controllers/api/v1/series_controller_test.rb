@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class Api::V1::SeriesControllerTest < ActionController::TestCase
+  # TODO: remove duplicate publish/punpublish tests
+  # TODO: refactor duplicate index tests (possibly include tests via mixin)
   def setup
     # create additional data
     2.times do
@@ -34,27 +36,103 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
   end
 
   # INDEX
-  
-  test "index should return valid json on all series" do
+
+  test "index should return json of published series ordered by published_at" do
     get :index
     series_response = json_response[:data]
     assert_not_nil series_response
-    assert_equal Series.count, series_response.count
-
-    assert_response 200
-  end
-
-  test "index should return user series with user_id param" do
-    get :index, { user_id: @user_with_series.id }
-    series_response = json_response[:data]
-    assert_not_nil series_response
-    assert_equal @series.count, series_response.count
-    series_response.each do |res|
-      assert @user_with_series.series_ids.include? res[:id].to_i
+    assert_equal Series.where(published: true).count, series_response.count
+    # verify series is ordered by published_at date and is published
+    prev_date = series_response.first[:attributes][:published_at]
+    series_response[2..-1].each do |series|
+      cur_date = series[:attributes][:published_at]
+      assert series[:attributes][:published]
+      assert cur_date <= prev_date
+      prev_date = cur_date
     end
 
     assert_response 200
   end
+  
+  ## BEGIN /USER_ID/SERIES
+  
+  # INDEX
+
+  test "index should return all un/published user series on valid user_id and logged in user" do
+    log_in_as @user_with_series
+    get :index, { user_id: @user_with_series.id }
+    series = @user_with_series.series
+    series_response = json_response[:data]
+    assert_not_nil series_response
+    assert_equal series.count, series_response.count
+
+    series_response.each do |response|
+      assert series.ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "index should return published on published flag user series on valid user_id and logged in user" do
+    log_in_as @user_with_series
+    get :index, { user_id: @user_with_series.id, published: true }
+    published_series = @user_with_series.published_series
+    series_response = json_response[:data]
+    assert_not_nil series_response
+    assert_equal published_series.count, series_response.count
+
+    series_response.each do |response|
+      assert published_series.ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "index should return published user series on valid user_id and logged in non-owner" do
+    log_in_as @user
+    get :index, { user_id: @user_with_series.id }
+    published_series = @user_with_series.published_series
+    series_response = json_response[:data]
+    assert_not_nil series_response
+    assert_equal published_series.count, series_response.count
+
+    series_response.each do |response|
+      assert published_series.ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "index should ignore published flag with user series on valid user_id and logged in non-owner" do
+    log_in_as @user
+    get :index, { user_id: @user_with_series.id, published: false }
+    published_series = @user_with_series.published_series
+    series_response = json_response[:data]
+    assert_not_nil series_response
+    assert_equal published_series.count, series_response.count
+
+    series_response.each do |response|
+      assert published_series.ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  test "index should return published user series on valid user_id" do
+    get :index, { user_id: @user_with_series.id }
+    published_series = @user_with_series.published_series
+    series_response = json_response[:data]
+    assert_not_nil series_response
+    assert_equal published_series.count, series_response.count
+
+    series_response.each do |response|
+      assert published_series.ids.include? response[:id].to_i
+    end
+
+    assert_response 200
+  end
+
+  ## END /USER_ID/SERIES
 
   # CREATE
 

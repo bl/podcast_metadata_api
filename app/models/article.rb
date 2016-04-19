@@ -21,21 +21,7 @@ class Article < ActiveRecord::Base
       articles = articles.where(author_id: user.id) if user
     end
 
-    if params[:published].present?
-      # TODO: verify if safe enough
-      published_type = (params[:published]) ? true : false
-      articles = articles.where(published: published_type)
-    end
-
-    articles
-  end
-
-  # publish article if valid. executes validators
-  def publish
-    update(published: true, published_at: Time.zone.now)
-  end
-
-  def unpublish
-    update_columns(published: false, published_at: nil)
+    # perform publishable searches
+    articles = PublishableSearch.new(articles).search(params)
   end
 end

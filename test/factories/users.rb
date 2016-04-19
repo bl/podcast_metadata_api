@@ -19,7 +19,7 @@ FactoryGirl.define do
       end
 
       after(:create) do |user, evaluator|
-        create_list(:series, evaluator.series_count, user: user)
+        create_list(:published_series, evaluator.series_count, user: user)
       end
     end
 

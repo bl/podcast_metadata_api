@@ -19,15 +19,10 @@ class ActiveSupport::TestCase
 
   def create_session_for(user, options = {})
     password = options[:password] || 'password'
-    if integration_test?
-      post api_sessions_path, session: { email:    user.email,
-                                           password: password }
-      json_response[:data][:attributes][:auth_token]
-    else
-      user.create_auth_token
-      user.save
-      user.auth_token
-    end
+
+    user.create_auth_token
+    user.save
+    user.auth_token
   end
 
   # log in as user by creating session for user, then setting authorization header
@@ -72,14 +67,38 @@ class ActiveSupport::TestCase
     create_article_timestamp(podcast, article)
     # publish article
     #article.update published: true, published_at: Time.zone.now
-    article.publish
+    ResourcePublisher.new(article).publish
 
     article
   end
 
+  # send a post authenticated as the provided user
+  # refer to send_as for documentation
+  def post_as user, post_path, post_args = nil
+    #post post_path, post_args, headers
+    send_as :post, user, post_path, post_args
+  end
+
+  # send a delete authenticated as the provided user
+  # refer to send_as for documentation
+  def delete_as user, delete_path, delete_args = nil
+    #delete delete_path, delete_args, headers
+    send_as :delete, user, delete_path, delete_args
+  end
+
   private
 
-    def integration_test?
-      defined? post_via_redirect
-    end
+  # send a request of request type as the given user
+  # user:     user to authenticate the delete as
+  # req_type: type of request to send
+  # req_path: path to req to
+  # req_args: arguments for the req
+  def send_as req_type, user, req_path, req_args = nil
+    headers = { 'Authorization' => user.auth_token }
+    self.send req_type, req_path, req_args, headers
+  end
+
+  def integration_test?
+    defined? post_via_redirect
+  end
 end

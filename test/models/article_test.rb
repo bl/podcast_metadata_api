@@ -33,7 +33,7 @@ class ArticleTest < ActiveSupport::TestCase
   # published
 
   test "should not be published when timestamp is not present" do
-    @article.publish
+    ResourcePublisher.new(@article).publish
     @series_with_podcasts.podcasts.each do |podcast|
       podcast.timestamps.each {|timestamp| timestamp.update_attribute :article, nil}
     end
@@ -47,7 +47,7 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   test "published_at should be valid on published article" do
-    @article.publish
+    ResourcePublisher.new(@article).publish
     assert_not_nil @article.published_at
   end
 end

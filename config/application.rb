@@ -28,5 +28,6 @@ module PodcastMetadataApi
 
     # autoload lib/ folder and all subdirectories (used to load podcast client api)
     #config.autoload_paths += Dir["#{config.root}/lib/**/*"]
+    #config.autoload_paths += Dir["#{config.root}/helpers/*"]
   end
 end
