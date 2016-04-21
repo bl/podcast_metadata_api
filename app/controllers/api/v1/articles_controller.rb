@@ -1,16 +1,9 @@
 class Api::V1::ArticlesController < Api::V1::PublishableController
+  prepend_before_action :valid_article, only: [:show]
   before_action :logged_in_user,  only: [:create, :publish, :unpublish, :update, :destroy]
   before_action :correct_article, only: [:publish, :unpublish, :update, :destroy]
 
   def show
-    @article = Article.find_by id: params[:id]
-    render json: ErrorSerializer.serialize(article: "is invalid"), status: 422 and return unless @article
-
-    # display unpublished article only if logged_in user is the owner
-    unless @article.published || (!@article.published && logged_in? && current_user.articles.exists?(@article.id))
-      render json: ErrorSerializer.serialize(article: "is invalid"), status: 422 and return
-    end
-
     render json: @article
   end
 
@@ -49,6 +42,12 @@ class Api::V1::ArticlesController < Api::V1::PublishableController
   end
 
   private
+
+  # verify article exists based on provided id
+  def valid_article
+    @article ||= Article.find_by id: params[:id]
+    render json: ErrorSerializer.serialize(article: "is invalid"), status: 422 and return unless @article
+  end
 
   def article_params
     params.require(:article).permit(:content)

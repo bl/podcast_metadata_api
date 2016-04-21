@@ -1,11 +1,9 @@
 class Api::V1::SeriesController < Api::V1::PublishableController
-  before_action :logged_in_user,  only: [:create, :update, :destroy]
-  before_action :correct_series,  only: [:update, :destroy]
+  prepend_before_action :valid_series, only: [:show]
+  before_action :logged_in_user,  only: [:create, :publish, :unpublish, :update, :destroy]
+  before_action :correct_series,  only: [:publish, :unpublish, :update, :destroy]
 
   def show
-    @series = Series.find_by id: params[:id] 
-    render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 and return unless @series
-
     render json: @series
   end
 
@@ -40,7 +38,7 @@ class Api::V1::SeriesController < Api::V1::PublishableController
 
   # return the resource (used in base Publishable class)
   def resource
-    @article
+    @series
   end
 
   private
@@ -52,5 +50,10 @@ class Api::V1::SeriesController < Api::V1::PublishableController
   def correct_series
     @series ||= current_user.series.find_by id: params[:id]
     render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 unless @series
+  end
+
+  def valid_series
+    @series ||= Series.find_by id: params[:id]
+    render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 and return unless @series
   end
 end

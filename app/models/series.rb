@@ -2,6 +2,9 @@ class Series < ActiveRecord::Base
   belongs_to :user
 
   has_many :podcasts, dependent: :destroy
+  has_many :published_podcasts, -> { where published: true },
+                          class_name: 'Podcast',
+                          dependent: :destroy
 
   validates :user,        presence: true
   validates :title,       presence: true,

@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class Api::V1::TimestampsControllerTest < ActionController::TestCase
+  include ResourcesControllerTest
+
   def setup
     # create additional data
     2.times do
@@ -12,6 +14,42 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     include_default_accept_headers
   end
 
+  def resource_class
+    Timestamp
+  end
+
+  def user
+    @podcast.series.user
+  end
+
+  def user_with_resources
+    @podcast_with_timestamps.series.user
+  end
+
+  def resources_for user
+    user.series.first.podcasts.first.timestamps
+  end
+
+  def valid_resource_attributes
+    { start_time: 10, end_time: nil }
+  end
+
+  def invalid_resource_attributes
+    { start_time: 10, end_time: 5 }
+  end
+
+  def invalid_attribute_id
+    'end_time'
+  end
+
+  def invalid_attribute_detail
+    'must be less than start time'
+  end
+
+  def post_params
+    { podcast_id: @podcast }
+  end
+
   # SHOW
 
   test "should return valid json on timestamp get" do
@@ -21,16 +59,6 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
     assert_equal @timestamps.first.id, timestamp_response[:id].to_i
 
     assert_response 200
-  end
-
-  test "should return json errors on invalid timetamp id get" do
-    get :show, id: -1
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /timestamp/, timestamp_errors.first[:id].to_s
-    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
   end
 
   # INDEX
@@ -58,156 +86,13 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
 
   # CREATE
 
-  test "create should return json errors when not logged in" do
-    valid_timestamp_attributes = { start_time: 5, end_time: 10 }
-    assert_no_difference '@podcast.timestamps.count' do
-      post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
-    end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /user/, timestamp_errors.first[:id].to_s
-    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
-
-    assert_response :unauthorized
-  end
-
   test "create should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 5, end_time: 10 }
-    log_in_as @podcast_with_timestamps.series.user
     assert_no_difference '@podcast.timestamps.count' do
-      post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
+      post_as @podcast_with_timestamps.series.user, :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
     end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /podcast/, timestamp_errors.first[:id].to_s
-    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
+    validate_response json_response[:errors], /podcast/, /is invalid/
 
     assert_response 422
-  end
-
-  test "create should return json errors on invalid attribtues" do
-    invalid_timestamp_attributes = { start_time: 10, end_time: 5 }
-    log_in_as @podcast.series.user
-    assert_no_difference '@podcast.timestamps.count' do
-      post :create, podcast_id: @podcast, timestamp: invalid_timestamp_attributes
-    end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /end_time/, timestamp_errors.first[:id].to_s
-    assert_match /must be less than start time/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
-  end
-
-  test "create should return valid json on valid attributes" do
-    valid_timestamp_attributes = { start_time: 5, end_time: 10 }
-    log_in_as @podcast.series.user
-    assert_difference '@podcast.timestamps.count', 1 do
-      post :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
-    end
-    timestamp_response = json_response[:data]
-    assert_not_nil timestamp_response
-    assert_equal @podcast.timestamps.first.id, timestamp_response[:id].to_i
-
-    assert_response 201
-  end
-
-  # UPDATE
-
-  test "update should return json errors when not logged in" do
-    valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /user/, timestamp_errors.first[:id].to_s
-    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
-
-    assert_response :unauthorized
-  end
-
-  test "update should return json errors on non-logged in users podcast" do
-    valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    log_in_as @podcast.series.user
-    patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /timestamp/, timestamp_errors.first[:id].to_s
-    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
-  end
-
-  test "update should return json errors on invalid attributes" do
-    invalid_timestamp_attributes = { start_time: @podcast_with_timestamps.end_time, end_time: nil }
-    log_in_as @podcast_with_timestamps.series.user
-    patch :update, id: @timestamps.first, timestamp: invalid_timestamp_attributes
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /start_time/, timestamp_errors.first[:id].to_s
-    assert_match /must be within podcast length/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
-  end
-
-  test "update should return valid json on valid attributes" do
-    valid_timestamp_attributes = { start_time: 10, end_time: nil }
-    log_in_as @podcast_with_timestamps.series.user
-    patch :update, id: @timestamps.first, timestamp: valid_timestamp_attributes
-    timestamp_response = json_response[:data]
-    assert_not_nil timestamp_response
-    assert_equal valid_timestamp_attributes[:end_time], @timestamps.reload.first.end_time
-    assert_equal valid_timestamp_attributes[:end_time], timestamp_response[:attributes][:end_time]
-
-    assert_response 200
-  end
-
-  # DESTROY
-  
-  test "destroy should return authorization error when not logged in" do
-    assert_no_difference '@timestamps.count' do
-      delete :destroy, id: @timestamps.first
-    end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /user/, timestamp_errors.first[:id].to_s
-    assert_match /not authenticated/, timestamp_errors.first[:detail].to_s
-
-    assert_response :unauthorized
-  end
-
-  test "destroy should return json errors on invalid timestamp id" do
-    log_in_as @podcast_with_timestamps.series.user
-    assert_no_difference '@timestamps.count' do
-      delete :destroy, id: -1
-    end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /timestamp/, timestamp_errors.first[:id].to_s
-    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
-  end
-
-  test "destroy should return json errors on non-logged in user podcasts timestamp" do
-    log_in_as @podcast.series.user
-    assert_no_difference '@timestamps.count' do
-      delete :destroy, id: @timestamps.first
-    end
-    timestamp_errors = json_response[:errors]
-    assert_not_nil timestamp_errors
-    assert_match /timestamp/, timestamp_errors.first[:id].to_s
-    assert_match /is invalid/, timestamp_errors.first[:detail].to_s
-
-    assert_response 422
-  end
-
-  test "destroy should return empty payload on valid timestamp destroy" do
-    log_in_as @podcast_with_timestamps.series.user
-    assert_difference '@timestamps.count', -1 do
-      delete :destroy, id: @timestamps.first
-    end
-    assert_empty response.body
-
-    assert_response 204
   end
 end

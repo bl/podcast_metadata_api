@@ -15,9 +15,17 @@ Rails.application.routes.draw do
       resources :account_activations, only: [:create, :edit]
       resources :series,              only: [:show, :index, :create, :update, :destroy] do
         resources :podcasts,            only: [:index, :create]
+        member do
+          post :publish
+          delete :unpublish
+        end
       end
       resources :podcasts,            only: [:show, :index, :create, :update, :destroy] do
         resources :timestamps,          only: [:index, :create]
+        member do
+          post :publish
+          delete :unpublish
+        end
       end
       resources :timestamps,          only: [:show, :update, :destroy]
       resources :articles,            only: [:show, :index, :create, :update, :destroy] do

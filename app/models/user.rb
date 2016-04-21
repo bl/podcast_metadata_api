@@ -15,6 +15,9 @@ class User < ActiveRecord::Base
                       dependent: :destroy
   has_many :published_series, -> { where published: true },
                       class_name: 'Series', dependent: :destroy
+  has_many :published_podcasts,  through: :series,
+                      source: :published_podcasts,
+                      dependent: :destroy
 
   # valid email regex
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i

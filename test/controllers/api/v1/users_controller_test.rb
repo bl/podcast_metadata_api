@@ -103,42 +103,30 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "update should return authorization error when not logged in" do
     update_user_attributes = { name: "New Name" }
     patch :update, id: @user, user: update_user_attributes
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /not authenticated/, user_errors.first.to_s
+    validate_response json_response[:errors], /user/, /not authenticated/
     
     assert_response :unauthorized
   end
 
   test "should return json errors on invalid user id" do
     update_user_attributes = { email: "new_email@example.com" }
-    log_in_as @user
-    patch :update, id: -1, user: update_user_attributes
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first.to_s
+    patch_as @user, :update, id: -1, user: update_user_attributes
+    validate_response json_response[:errors], /user/, /is invalid/
     
     assert_response 422
   end
 
   test "should return json errors on other user id update" do
     update_user_attributes = { email: "new_email@example.com" }
-    log_in_as @user
-    patch :update, id: @other_user, user: update_user_attributes
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first.to_s
+    patch_as @user, :update, id: @other_user, user: update_user_attributes
+    validate_response json_response[:errors], /user/, /is invalid/
     
     assert_response 422
   end
 
   test "should return valid json on valid user update" do
     update_user_attributes = { name: "New Name", email: "new_email@example.com" }
-    log_in_as @user
-    patch :update, id: @user, user: update_user_attributes
+    patch_as @user, :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload
@@ -151,9 +139,8 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return valid json on valid user password update" do
     new_password = "123456"
-    log_in_as @user
     update_user_attributes = { password: new_password, password_confirmation: new_password }
-    patch :update, id: @user, user: update_user_attributes
+    patch_as @user, :update, id: @user, user: update_user_attributes
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload
@@ -169,31 +156,23 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       delete :destroy, id: @user
     end
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /not authenticated/, user_errors.first.to_s
+    validate_response json_response[:errors], /user/, /not authenticated/
     
     assert_response :unauthorized
   end
 
   test "should return json errors on invalid user id destroy" do
-    log_in_as @user
     assert_no_difference 'User.count' do
-      delete :destroy, id: -1
+      delete_as @user, :destroy, id: -1
     end
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first.to_s
+    validate_response json_response[:errors], /user/, /is invalid/
     
     assert_response 422
   end
 
   test "should return json errors on other user id destroy" do
-    log_in_as @user
     assert_no_difference 'User.count' do
-      delete :destroy, id: @other_user
+      delete_as @user, :destroy, id: @other_user
     end
     user_errors = json_response[:errors]
     assert_not_nil user_errors
@@ -204,9 +183,8 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   end
   
   test "should return empty payload on valid user destroy" do
-    log_in_as @user
     assert_difference 'User.count', -1 do
-      delete :destroy, id: @user
+      delete_as @user, :destroy, id: @user
     end
     assert_empty response.body
     
@@ -214,13 +192,11 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   end
 
   test "destroy should destroy all dependent series" do
-    log_in_as @user_with_series
-    series = @user_with_series.series
     assert_difference 'User.count', -1 do
-      delete :destroy, id: @user_with_series
+      delete_as @user_with_series, :destroy, id: @user_with_series
     end
 
-    assert_empty series
+    assert_empty @user_with_series.series
     
     assert_response 204
   end
@@ -228,9 +204,8 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "destroy should destroy all dependent articles" do
     user_with_articles = FactoryGirl.create :user_with_unpublished_articles
     articles = user_with_articles.articles
-    log_in_as user_with_articles
     assert_difference 'User.count', -1 do
-      delete :destroy, id: user_with_articles
+      delete_as user_with_articles, :destroy, id: user_with_articles
     end
 
     assert_empty articles

@@ -12,25 +12,35 @@ FactoryGirl.define do
     end
 
     factory :activated_user, traits: [:activated]
+  end
 
-    factory :user_with_series, parent: :activated_user do
-      transient do
-        series_count 3
-      end
-
-      after(:create) do |user, evaluator|
-        create_list(:published_series, evaluator.series_count, user: user)
-      end
+  factory :user_with_series, parent: :activated_user do
+    transient do
+      series_count 3
     end
 
-    factory :user_with_unpublished_articles, parent: :activated_user do
-      transient do
-        articles_count 3
-      end
+    after(:create) do |user, evaluator|
+      create_list(:published_series, evaluator.series_count, user: user)
+    end
+  end
 
-      after(:create) do |user, evaluator|
-        create_list(:article, evaluator.articles_count, author: user)
-      end
+  factory :user_with_unpublished_series, parent: :activated_user do
+    transient do
+      series_count 3
+    end
+
+    after(:create) do |user, evaluator|
+      create_list(:series, evaluator.series_count, user: user)
+    end
+  end
+
+  factory :user_with_unpublished_articles, parent: :activated_user do
+    transient do
+      articles_count 3
+    end
+
+    after(:create) do |user, evaluator|
+      create_list(:article, evaluator.articles_count, author: user)
     end
   end
 end

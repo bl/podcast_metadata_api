@@ -26,8 +26,8 @@ module PodcastMetadataApi
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
 
-    # autoload lib/ folder and all subdirectories (used to load podcast client api)
-    #config.autoload_paths += Dir["#{config.root}/lib/**/*"]
+    # autoload lib/ folder and all subdirectories (used for inherited test files)
+    config.autoload_paths += Dir["#{config.root}/lib/**/*"]
     #config.autoload_paths += Dir["#{config.root}/helpers/*"]
   end
 end

@@ -16,6 +16,7 @@ class Article < ActiveRecord::Base
   def Article.search(params = {})
     articles = Article.all
 
+    # TODO: switch user_id to author_id to be consistent across API
     if params[:user_id].present?
       user = User.find_by id: params[:user_id]
       articles = articles.where(author_id: user.id) if user

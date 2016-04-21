@@ -1,12 +1,10 @@
-class Api::V1::PodcastsController < ApplicationController
-  before_action :logged_in_user,  only: [:create, :update, :destroy]
+class Api::V1::PodcastsController < Api::V1::PublishableController
+  prepend_before_action :valid_podcast, only: [:show]
+  before_action :logged_in_user,  only: [:create, :publish, :unpublish, :update, :destroy]
   before_action :correct_series,  only: [:create]
-  before_action :correct_podcast, only: [:update, :destroy]
+  before_action :correct_podcast, only: [:publish, :unpublish, :update, :destroy]
 
   def show
-    @podcast = Podcast.find_by id: params[:id]
-    render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 and return unless @podcast
-
     render json: @podcast
   end
 
@@ -37,6 +35,13 @@ class Api::V1::PodcastsController < ApplicationController
     head 204
   end
 
+  protected
+
+  # return the resource (used in base Publishable class)
+  def resource
+    @podcast
+  end
+
   private
 
     def podcast_params
@@ -52,5 +57,10 @@ class Api::V1::PodcastsController < ApplicationController
     def correct_series
       @series ||= current_user.series.find_by id: params[:series_id]
       render json: ErrorSerializer.serialize(series: "is invalid"), status: 422 unless @series
+    end
+
+    def valid_podcast
+      @podcast = Podcast.find_by id: params[:id]
+      render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 and return unless @podcast
     end
 end

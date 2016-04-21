@@ -29,7 +29,7 @@ class PodcastTest < ActiveSupport::TestCase
 
   # podcast_file
 
-  test "podcast_url should be valid and provide audio file" do
+  test "podcast_file should be valid and provide audio file" do
     @podcast.podcast_file = fixture_file_upload('images/rails.png', 'image/png')
     assert_not @podcast.valid?
     assert_match /is not a valid audio file/, @podcast.errors[:podcast_file].to_s

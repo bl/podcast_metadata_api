@@ -13,23 +13,6 @@ class ActiveSupport::TestCase
    fixture_file_upload("podcasts/#{file_name}", 'audio/') 
   end
 
-  def api_authorization_header(token)
-    request.headers['Authorization'] = token
-  end
-
-  def create_session_for(user, options = {})
-    password = options[:password] || 'password'
-
-    user.create_auth_token
-    user.save
-    user.auth_token
-  end
-
-  # log in as user by creating session for user, then setting authorization header
-  def log_in_as(user, options = {})
-    api_authorization_header create_session_for(user, options)
-  end
-
   # return json from response body
   def json_response
     JSON.parse response.body, symbolize_names: true
@@ -72,17 +55,34 @@ class ActiveSupport::TestCase
     article
   end
 
+  # verify match of error type within a resource's response
+  def validate_response resource_errors, attribute_id, attribute_detail
+    assert_not_nil resource_errors
+    assert_match attribute_id, resource_errors.first[:id].to_s
+    assert_match attribute_detail, resource_errors.first[:detail].to_s
+  end
+
+  # send a patch authenticated as the provided user
+  # refer to send_as for documentation
+  def patch_as user, patch_path, patch_args = nil
+    send_as :patch, user, patch_path, patch_args
+  end
+
+  # send a get authenticated as the provided user
+  # refer to send_as for documentation
+  def get_as user, get_path, get_args = nil
+    send_as :get, user, get_path, get_args
+  end
+
   # send a post authenticated as the provided user
   # refer to send_as for documentation
   def post_as user, post_path, post_args = nil
-    #post post_path, post_args, headers
     send_as :post, user, post_path, post_args
   end
 
   # send a delete authenticated as the provided user
   # refer to send_as for documentation
   def delete_as user, delete_path, delete_args = nil
-    #delete delete_path, delete_args, headers
     send_as :delete, user, delete_path, delete_args
   end
 
@@ -91,11 +91,16 @@ class ActiveSupport::TestCase
   # send a request of request type as the given user
   # user:     user to authenticate the delete as
   # req_type: type of request to send
-  # req_path: path to req to
+  # req_path: path to req to (:get/:post, etc for non-integration version)
   # req_args: arguments for the req
   def send_as req_type, user, req_path, req_args = nil
-    headers = { 'Authorization' => user.auth_token }
-    self.send req_type, req_path, req_args, headers
+    if integration_test?
+      headers = { 'Authorization' => user.auth_token }
+      self.send req_type, req_path, req_args, headers
+    else #TODO: test non integration functionality
+      request.headers['Authorization'] = user.auth_token
+      self.send req_type, req_path, req_args
+    end
   end
 
   def integration_test?

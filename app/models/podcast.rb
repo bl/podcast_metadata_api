@@ -1,7 +1,8 @@
 require 'taglib'
 
 class Podcast < ActiveRecord::Base
-  before_validation :initialize_metadata
+  # set metadata when podcast_file changes (either on create or update)
+  before_validation :initialize_metadata, if: :podcast_file_changed?
 
   belongs_to :series
   has_many :timestamps, dependent: :destroy
@@ -18,6 +19,9 @@ class Podcast < ActiveRecord::Base
                             numericality: { gerater_than_or_equal_to: 5 }
   validates :bitrate,       presence: true,
                             numericality: { gerater_than_or_equal_to: 0 }
+
+  # order podcasts in descending published date order on default scope
+  default_scope -> { order(published_at: :desc) }
 
   scope :filter_by_title, lambda { |keyword|
     where("lower(title) LIKE ?", "%#{keyword.downcase}%")
@@ -45,7 +49,8 @@ class Podcast < ActiveRecord::Base
     podcasts = podcasts.above_or_equal_to_end_time(params[:min_end_time].to_i) if params[:min_end_time].present?
     podcasts = podcasts.below_or_equal_to_end_time(params[:max_end_time].to_i) if params[:max_end_time].present?
 
-    podcasts
+    # perform publishable searches
+    podcasts = PublishableSearch.new(podcasts).search(params)
   end
 
   private
