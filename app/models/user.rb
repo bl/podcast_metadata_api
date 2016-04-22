@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   attr_accessor :activation_token
+
   before_save   :downcase_email
   # create auth_token on user create
   #   token created, but not usable until user activated
@@ -58,7 +59,7 @@ class User < ActiveRecord::Base
 
   # deliver an activation email to the user's email
   def send_activation_email
-    UserMailer.account_activation(self).deliver_later
+    UserMailer.account_activation(self, activation_token).deliver_later
   end
 
   # activate the current user

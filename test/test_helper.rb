@@ -9,6 +9,9 @@ class ActiveSupport::TestCase
   # mixin fixture_file_upload for podcast tests
   include ActionDispatch::TestProcess
 
+  # mixin background job tests for ActionMailer email deliver_later's
+  include ActiveJob::TestHelper
+
   def open_podcast_file(file_name)
    fixture_file_upload("podcasts/#{file_name}", 'audio/') 
   end

@@ -91,7 +91,11 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "should return valid json on valid user attributes" do
     valid_user_attributes = FactoryGirl.attributes_for :user
     assert_difference 'User.count', 1 do
-      post :create, user: valid_user_attributes
+      perform_enqueued_jobs do
+        post :create, user: valid_user_attributes
+        activation_email = ActionMailer::Base.deliveries.last
+        assert_match CGI::escape(valid_user_attributes[:email]), activation_email.body.encoded
+      end
     end
     assert_empty response.body
     
