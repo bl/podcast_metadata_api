@@ -20,14 +20,19 @@ class ApplicationController < ActionController::API
 
   private
 
-    def correct_podcast
-      @podcast ||= current_user.podcasts.find_by id: params[:podcast_id]
-      render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 unless @podcast
-    end
-    
-    def  logged_in_user
-      render json: ErrorSerializer.serialize(user: "not authenticated"),
-             status: :unauthorized and return unless !current_user.nil?
-      render json: ErrorSerializer.serialize(user: "has not been activated"), status: 403 unless current_user.activated?
-    end
+  # verify user is activated
+  def activated_user
+    render json: ErrorSerializer.serialize(user: "has not been activated"), status: 403 unless @user.activated?
+  end
+
+  def correct_podcast
+    @podcast ||= current_user.podcasts.find_by id: params[:podcast_id]
+    render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 unless @podcast
+  end
+
+  def logged_in_user
+    render json: ErrorSerializer.serialize(user: "not authenticated"),
+           status: :unauthorized and return unless !current_user.nil?
+    render json: ErrorSerializer.serialize(user: "has not been activated"), status: 403 unless current_user.activated?
+  end
 end

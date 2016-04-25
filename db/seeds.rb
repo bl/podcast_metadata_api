@@ -36,6 +36,14 @@ podcast_entries.each do |podcast_file|
   next if '.' == podcast_file || '..' == podcast_file
   title =  "Generic Podcast #{cur_podcast}"
 
+  # load first series with 9(+1) podcasts (same podcast)
+  if cur_podcast == 0
+    10.times do |n|
+      Series.first.podcasts.create!(title: title,
+                                    podcast_file: File.open( "#{seed_data_dir}/#{podcast_file}", "r"))
+    end
+  end
+
   puts "Creating Podcast: #{title} from file: #{podcast_file}"
   # add each podcast to next user (repeat once users exhausted)
   Series.all[cur_podcast % Series.count].podcasts.create!(title: title,

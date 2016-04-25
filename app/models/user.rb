@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
-  attr_accessor :activation_token
+  attr_accessor :activation_token, :reset_token
+
   before_save   :downcase_email
   # create auth_token on user create
   #   token created, but not usable until user activated
@@ -57,6 +58,11 @@ class User < ActiveRecord::Base
     SecureRandom.urlsafe_base64
   end
 
+  # verify if password reset has expired
+  def password_reset_expired?
+    self.reset_sent_at < 2.hours.ago
+  end
+
   # update activation digest with new token
   #   ie sending another account activation email
   def update_activation_digest
@@ -64,9 +70,28 @@ class User < ActiveRecord::Base
     save
   end
 
+  # update reset digest with a new token
+  #   ie sending a password reset email
+  def update_reset_digest
+    create_digest "reset"
+    self.reset_sent_at = Time.zone.now
+    save
+  end
+
+  # clear reset digest
+  #   ie user has successfully reset password
+  def clear_reset_digest
+    update_columns(reset_digest: nil, reset_sent_at: nil)
+  end
+
   # deliver an activation email to the user's email
   def send_activation_email
-    UserMailer.account_activation(self).deliver_now
+    UserMailer.account_activation(self, activation_token).deliver_later
+  end
+
+  # deliver a reset email to the user's email
+  def send_password_reset_email
+    UserMailer.password_reset(self, reset_token).deliver_later
   end
 
   # activate the current user
@@ -88,8 +113,14 @@ class User < ActiveRecord::Base
       self.email.downcase!
     end
 
+    # NOTE: method exists because it is used on an action callback
     def create_activation_digest
-      self.activation_token  = User.new_token
-      self.activation_digest = User.digest(activation_token)
+      create_digest :activation
+    end
+
+    # set attribute token and digest values
+    def create_digest attribute
+      send("#{attribute}_token=", User.new_token)
+      send("#{attribute}_digest=", User.digest(send("#{attribute}_token")))
     end
 end
