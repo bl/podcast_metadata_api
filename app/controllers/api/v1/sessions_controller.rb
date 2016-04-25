@@ -27,10 +27,4 @@ class Api::V1::SessionsController < ApplicationController
         render json: ErrorSerializer.serialize(email_password: "is invalid"), status: 422
       end
     end
-
-    def activated_user
-      unless @user.activated?
-        render json: ErrorSerializer.serialize(user: "has not been activated"), status: 403
-      end
-    end
 end

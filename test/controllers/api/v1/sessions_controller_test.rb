@@ -34,15 +34,13 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
   end
 
   test "should return valid json on valid user login" do
-    old_token = @user.auth_token
     valid_login_attributes = { email:     @user.email,
                                password:  "password" }
     post :create, session: valid_login_attributes
     session_response = json_response[:data]
     assert_not_nil session_response
-    @user.reload
-    assert_equal @user.auth_token, session_response[:attributes][:auth_token]
-    assert_not_equal old_token, @user.auth_token
+    assert_not_equal @user.auth_token, @user.reload.auth_token
+    assert_equal @user.auth_token, session_response[:attributes][:"auth-token"]
 
     assert_response 200
   end

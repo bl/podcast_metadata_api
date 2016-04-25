@@ -13,7 +13,7 @@ class UserMailer < ApplicationMailer
   def account_activation(user, activation_token)
     @user = user
     @activation_token = activation_token
-    mail to: user.email, subject: "Account activation"
+    mail to: user.email, subject: "Account Activation"
   end
 
   # Subject can be set in your I18n file at config/locales/en.yml
@@ -21,9 +21,11 @@ class UserMailer < ApplicationMailer
   #
   #   en.user_mailer.password_reset.subject
   #
-  def password_reset(user)
+  # TODO: reset email should be a link to the web api client, which will then
+  # provide a front end for the password reset of the RESTful API
+  def password_reset(user, reset_token)
     @user = user
-
-    mail to: user.email, subject: "Password reset"
+    @reset_token = reset_token
+    mail to: user.email, subject: "Password Reset Request"
   end
 end

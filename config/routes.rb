@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       end
       resources :sessions,            only: [:create, :destroy]
       resources :account_activations, only: [:create, :edit]
+      resources :password_resets, only: [:show, :create, :update]
       resources :series,              only: [:show, :index, :create, :update, :destroy] do
         resources :podcasts,            only: [:index, :create]
       end

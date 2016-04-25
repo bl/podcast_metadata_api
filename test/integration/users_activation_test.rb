@@ -49,16 +49,15 @@ class UsersActivationTest < ActionDispatch::IntegrationTest
   end
 
   test "create token request should return valid response on valid user email" do
-    original_activation_digest = @user.activation_digest
     # verify email delivered is correct
     perform_enqueued_jobs do
       post api_account_activations_path(email: @user.email)
       activation_email = ActionMailer::Base.deliveries.last
       assert_match CGI::escape(@user.email), activation_email.body.encoded
     end
-    assert_not_equal original_activation_digest, @user.reload.activation_digest
     assert_response 201
     assert_empty response.body
+    assert_not_equal @user.activation_digest, @user.reload.activation_digest
   end
 
   # EDIT
