@@ -38,9 +38,9 @@ module PublishableControllerTest
     assert_not_nil resources_response
     assert_equal resource_class.where(published: true).count, resources_response.count
     # verify resource is ordered by published_at date and is published
-    prev_date = resources_response.first[:attributes][:published_at]
+    prev_date = resources_response.first[:attributes][:"published-at"]
     resources_response[2..-1].each do |resource|
-      cur_date = resource[:attributes][:published_at]
+      cur_date = resource[:attributes][:"published-at"]
       assert resource[:attributes][:published]
       assert cur_date <= prev_date
       prev_date = cur_date
