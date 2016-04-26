@@ -25,20 +25,14 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
   test "user attempts to request password reset with invalid user email" do
     post api_password_resets_path(email: "invalid_email@example.com")
     assert_response 422
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /email/, reset_errors.first[:id].to_s
-    assert_match /is invalid/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /email/, /is invalid/
   end
 
   test "user attempts to request password reset with non-activated user" do
     non_activated_user = FactoryGirl.create :user
     post api_password_resets_path(email: non_activated_user.email)
     assert_response 403
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /user/, reset_errors.first[:id].to_s
-    assert_match /has not been activated/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /user/, /has not been activated/
   end
 
   test "user successfully requests password reset with valid user email" do
@@ -59,10 +53,7 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
     valid_reset_params = { password: "foobar",
                            password_confirmation: "foobar" }
     patch api_password_reset_path "invalid_token", email: @user.email, user: valid_reset_params
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /reset_token/, reset_errors.first[:id].to_s
-    assert_match /is invalid/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /reset_token/, /is invalid/
   end
 
   test "user attempts to submit password update with invalid email" do
@@ -74,10 +65,7 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
                              password_confirmation: "foobar" }
     patch api_password_reset_path user.reset_token, email: "invalid_email@example.com", user: valid_reset_params
     assert_response 422
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /email/, reset_errors.first[:id].to_s
-    assert_match /is invalid/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /email/, /is invalid/
   end
 
   test "user attempts to submit password update with invalid password" do
@@ -89,10 +77,7 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
                              password_confirmation: "barfoo" }
     patch api_password_reset_path user.reset_token, email: user.email, user: invalid_reset_params
     assert_response 422
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /password_confirmation/, reset_errors.first[:id].to_s
-    assert_match /doesn't match Password/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /password_confirmation/, /doesn't match Password/
   end
 
   test "user attempts to submit password update with expired reset token" do
@@ -106,10 +91,7 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
                            password_confirmation: "foobar" }
     patch api_password_reset_path user.reset_token, email: user.email, user: valid_reset_params
     assert_response 422
-    reset_errors = json_response[:errors]
-    assert_not_nil reset_errors
-    assert_match /reset_token/, reset_errors.first[:id].to_s
-    assert_match /has expired/, reset_errors.first[:detail].to_s
+    validate_response json_response[:errors], /reset_token/, /has expired/
   end
 
   test "user successfully submits password update with valid password" do

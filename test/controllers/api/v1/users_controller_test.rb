@@ -27,10 +27,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on invalid user id get" do
     get :show, id: -1
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first[:detail].to_s
+    validate_response json_response[:errors], /user/, /is invalid/
 
     assert_response 422
   end
@@ -39,10 +36,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     # create non-activated user
     non_activated_user = FactoryGirl.create :user
     get :show, id: non_activated_user
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /user/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first[:detail].to_s
+    validate_response json_response[:errors], /user/, /is invalid/
 
     assert_response 422
   end
@@ -80,10 +74,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_no_difference 'User.count' do
       post :create, user: invalid_user_attributes
     end
-    user_errors = json_response[:errors]
-    assert_not_nil user_errors
-    assert_match /email/, user_errors.first[:id].to_s
-    assert_match /is invalid/, user_errors.first[:detail].to_s
+    validate_response json_response[:errors], /email/, /is invalid/
     
     assert_response 422
   end

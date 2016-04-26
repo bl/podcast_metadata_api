@@ -88,10 +88,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     assert_no_difference '@user_with_unpublished_articles.published_articles.count' do
       post_as @user_with_unpublished_articles, :publish, id: article
     end
-    article_errors = json_response[:errors]
-    assert_not_nil article_errors
-    assert_match /base/, article_errors.first[:id].to_s
-    assert_match /Article cannot be published without an associated timestamp/, article_errors.first[:detail].to_s
+    validate_response json_response[:errors], /base/, /Article cannot be published without an associated timestamp/
 
     assert_response 422
   end
