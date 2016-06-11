@@ -2,7 +2,9 @@ require 'test_helper'
 
 class Api::V1::ArticlesControllerTest < ActionController::TestCase
   include ResourcesControllerTest
-  include PublishableControllerTest
+  include PublishedControllerTest
+  include PaginatedControllerTest
+  include LimitedSearchControllerTest
 
   def setup
     # create additional data
@@ -58,6 +60,10 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
 
   def published_resources_for user
     user.published_articles
+  end
+
+  def all_published_resources
+    Article.where published: true
   end
 
   def valid_resource_attributes

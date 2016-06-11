@@ -1,4 +1,4 @@
-module PublishableControllerTest
+module PublishedControllerTest
   extend ActiveSupport::Testing::Declarative
   include ActionView::Helpers::TextHelper
   include ResourceTestHelper
@@ -117,6 +117,31 @@ module PublishableControllerTest
     end
 
     assert_response 200
+  end
+
+  # TODO: verify valid_before/valid_after works regardless of results order, ie
+  # searching with another form of ordering
+
+  test "should return resources published after time" do
+    get :index, { published_after: resource.published_at }
+    assert_response 200
+    resources_response = json_response[:data]
+    assert_not_nil resources_response
+    # verify all resources are ordered on/after given time (using default published-by ordering)
+    resources_response.each do |resource_res|
+      assert resource.published_at <= Time.new(resource_res[:attributes][:"published-at"])
+    end
+  end
+
+  test "should return resources published before time" do
+    get :index, { published_before: resource.published_at }
+    assert_response 200
+    resources_response = json_response[:data]
+    assert_not_nil resources_response
+    # verify all resources are ordered on/after given time (using default published-by ordering)
+    resources_response.each do |resource_res|
+      assert resource.published_at >= Time.new(resource_res[:attributes][:"published-at"])
+    end
   end
 
   # PUBLISH

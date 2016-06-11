@@ -1,6 +1,6 @@
-# PublishableSearch:
+# PublishedSearch:
 # provides general logic around searching publishable resources
-class PublishableSearch
+class PublishedSearch
   def initialize(resource)
     @resources = resource
   end
@@ -13,6 +13,14 @@ class PublishableSearch
       # TODO: verify if safe enough
       published_type = (params[:published]) ? true : false
       @resources = @resources.where(published: published_type)
+    end
+
+    if params[:published_before].present?
+      @resources = @resources.greater_or_equal_to_published_at(params[:published_before])
+    end
+
+    if params[:published_after].present?
+      @resources = @resources.less_or_equal_to_published_at(params[:published_after])
     end
 
     @resources

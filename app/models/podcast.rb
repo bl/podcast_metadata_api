@@ -35,8 +35,21 @@ class Podcast < ActiveRecord::Base
     where("end_time <= ?", end_time)
   }
 
+  # TODO: move scopes to common class that all published resources explicitly use (ie try to avoid ambiguous include mixins)
+  scope :greater_or_equal_to_published_at, lambda { |published_at|
+    where("published_at >= ?", published_at)
+  }
+
+  scope :less_or_equal_to_published_at, lambda { |published_at|
+    where("published_at <= ?", published_at)
+  }
+
   def Podcast.search(params = {})
-    podcasts = Podcast.all
+    # if both user_id and series_id are provided, only use series_id (more specific)
+    if params[:user_id].present? && params[:series_id].present?
+      params.delete :user_id
+    end
+    podcasts = PaginatedSearch.new(Podcast, Podcast.all).search(params)
     if params[:user_id].present?
       user = User.find_by id: params[:user_id]
       podcasts = user.podcasts if user
@@ -50,7 +63,10 @@ class Podcast < ActiveRecord::Base
     podcasts = podcasts.below_or_equal_to_end_time(params[:max_end_time].to_i) if params[:max_end_time].present?
 
     # perform publishable searches
-    podcasts = PublishableSearch.new(podcasts).search(params)
+    podcasts = PublishedSearch.new(podcasts).search(params)
+
+    # perform search limiting
+    podcasts = LimitedSearch.new(podcasts).search(params)
   end
 
   private

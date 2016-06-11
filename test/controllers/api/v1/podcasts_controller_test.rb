@@ -2,7 +2,9 @@ require 'test_helper'
 
 class Api::V1::PodcastsControllerTest < ActionController::TestCase
   include ResourcesControllerTest
-  include PublishableControllerTest
+  include PublishedControllerTest
+  include PaginatedControllerTest
+  include LimitedSearchControllerTest
 
   def setup
     # create additional data
@@ -55,6 +57,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   def user_with_unpublished_resources
     @user_with_unpublished_podcasts
+  end
+
+  def all_published_resources
+    Podcast.where published: true
   end
 
   def resources_for user
@@ -158,6 +164,24 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     get :index, { min_end_time: 87, max_end_time: 89}
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
+  end
+
+  test "should return results filtered by series when both user_id and series_id is provided" do
+    # NOTE: user has 3 podcasts, first series has 2
+    series = @user_with_podcasts.series
+    get :index, { series_id: series.first.id, user_id: @user_with_podcasts.id }
+    assert_response 200
+    podcasts_response = json_response[:data]
+    assert_not_nil podcasts_response
+    assert_equal series.first.published_podcasts.count, podcasts_response.count
+
+    podcasts_response.each do |podcast|
+      assert series.first.published_podcast_ids.include? podcast[:id].to_i
+    end
+
+    # alternative to above, maybe too convoluted
+    #response_podcast_ids = podcasts_response.map {|x| x[:id].to_i }
+    #assert (response_podcast_ids - series.first.published_podcast_ids).empty?
   end
 
   # CREATE

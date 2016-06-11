@@ -14,15 +14,26 @@ class Series < ActiveRecord::Base
   # order series in descending published date order on default scope
   default_scope -> { order(published_at: :desc) }
 
+  scope :greater_or_equal_to_published_at, lambda { |published_at|
+    where("published_at >= ?", published_at)
+  }
+
+  scope :less_or_equal_to_published_at, lambda { |published_at|
+    where("published_at <= ?", published_at)
+  }
+
   def Series.search(params = {})
-    series = Series.all
+    series = PaginatedSearch.new(Series, Series.all).search(params)
     if params[:user_id].present?
       user = User.find_by id: params[:user_id]
       series = user.series if user
     end
 
     # perform publishable searches
-    series = PublishableSearch.new(series).search(params)
+    series = PublishedSearch.new(series).search(params)
+
+    # perform search limiting
+    series = LimitedSearch.new(series).search(params)
   end
 
 end

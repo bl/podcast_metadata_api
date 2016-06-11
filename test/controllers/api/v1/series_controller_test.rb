@@ -2,7 +2,9 @@ require 'test_helper'
 
 class Api::V1::SeriesControllerTest < ActionController::TestCase
   include ResourcesControllerTest
-  include PublishableControllerTest
+  include PublishedControllerTest
+  include PaginatedControllerTest
+  include LimitedSearchControllerTest
 
   def setup
     # create additional data
@@ -36,6 +38,10 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
 
   def user_with_unpublished_resources
     @user_with_unpublished_series
+  end
+
+  def all_published_resources
+    Series.where published: true
   end
 
   def resources_for user

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160310091112) do
+ActiveRecord::Schema.define(version: 20160508064544) do
 
   create_table "articles", force: :cascade do |t|
     t.text     "content"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 20160310091112) do
   end
 
   add_index "articles", ["author_id"], name: "index_articles_on_author_id"
+  add_index "articles", ["published_at"], name: "index_articles_on_published_at"
 
   create_table "podcasts", force: :cascade do |t|
     t.string   "title"
@@ -36,8 +37,10 @@ ActiveRecord::Schema.define(version: 20160310091112) do
     t.datetime "published_at"
   end
 
+  add_index "podcasts", ["published_at"], name: "index_podcasts_on_published_at"
   add_index "podcasts", ["series_id"], name: "index_podcasts_on_series_id"
   add_index "podcasts", ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
+  add_index "podcasts", ["title", "published_at"], name: "index_podcasts_on_title_and_published_at"
   add_index "podcasts", ["title"], name: "index_podcasts_on_title"
 
   create_table "series", force: :cascade do |t|
@@ -50,6 +53,7 @@ ActiveRecord::Schema.define(version: 20160310091112) do
     t.datetime "published_at"
   end
 
+  add_index "series", ["published_at"], name: "index_series_on_published_at"
   add_index "series", ["user_id"], name: "index_series_on_user_id"
 
   create_table "timestamps", force: :cascade do |t|
