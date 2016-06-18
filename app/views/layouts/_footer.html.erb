@@ -1,0 +1,24 @@
+<footer class="footer">
+  <small>
+    <nav class="navbar navbar-inverse navbar-fixed-bottom">
+      <div id="footer" class="container">
+        <% if @podcast %>
+          <section class="playbar">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span>
+              </button>
+            </div>
+            <%= audio_tag(@podcast.podcast_file ,controls: true) %>
+          </section>
+        <% end %>
+      </div>
+    </nav>
+  </small>
+</footer>

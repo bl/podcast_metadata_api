@@ -1,0 +1,6 @@
+<ul>
+  <% jq_upload = @podcast.to_jq_upload %>
+  <% jq_upload[:files].each do |file| %>
+    <%= render 'podcast_file', cur_file: file %>
+  <% end %>
+</ul>

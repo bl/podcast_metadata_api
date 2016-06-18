@@ -1,0 +1,20 @@
+<h1>Podcast Upload</h1>
+
+<%= form_for(@podcast, url: api_podcasts_url, remote: true, html: { multipart: true, id: "podcast_create_form" }) do |f| %>
+  <%= hidden_field_tag :series_id, Series.first.id %>
+  <%= hidden_field_tag :podcast_post_url, api_podcasts_url %>
+  <%= hidden_field_tag :user_auth_token, Series.first.user.auth_token %>
+
+  <%= f.label :title %>
+  <%= f.text_field :title %>
+
+  <%= f.label :pocast_file %>
+  <div class="fileupload-buttonbar">
+    <span class="btn btn-mini fileupload-button">
+      <i class="icon-plus"></i>
+      <%= f.file_field :podcast_file, accept: 'audio/' %>
+    </span>
+  </div>
+
+  <%= f.submit id: "podcast_submit", class: "btn btn-mini btn-success" %>
+<% end %>
