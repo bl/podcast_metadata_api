@@ -2,7 +2,7 @@ require 'taglib'
 
 class Podcast < ActiveRecord::Base
   # set metadata when podcast_file changes (either on create or update)
-  before_validation :initialize_metadata, if: :podcast_file_changed?
+  before_validation :initialize_metadata, if: :updated_podcast_file?
 
   belongs_to :series
   has_many :timestamps, dependent: :destroy
@@ -12,13 +12,14 @@ class Podcast < ActiveRecord::Base
   validates :title,         presence: true,
                             length: { maximum: 100 }
   #TODO: look into carrierwave's validation
-  # possibly redundant presence check
-  validates :podcast_file,  presence: true
   validates :series,        presence: true
-  validates :end_time,      presence: true, 
-                            numericality: { gerater_than_or_equal_to: 5 }
-  validates :bitrate,       presence: true,
-                            numericality: { gerater_than_or_equal_to: 0 }
+  validate :publishable
+  with_options if:  -> { podcast_file.present? } do
+    validates :end_time,    presence: true,
+                            numericality: { greater_than_or_equal_to: 5 }
+    validates :bitrate,     presence: true,
+                            numericality: { greater_than_or_equal_to: 0 }
+  end
 
   # order podcasts in descending published date order on default scope
   default_scope -> { order(published_at: :desc) }
@@ -69,17 +70,34 @@ class Podcast < ActiveRecord::Base
     podcasts = LimitedSearch.new(podcasts).search(params)
   end
 
+  def clear_podcast_file
+    remove_podcast_file!
+    end_time = nil
+    bitrate = nil
+  end
+
   private
     
   def initialize_metadata
     TagLib::FileRef.open(self.podcast_file.current_path) do |file|
       if file.null?
         self.errors[:podcast_file] = "is not a valid audio file"
+        remove_podcast_file!
+        assign_attributes(end_time: nil, bitrate: nil)
       else
         prop = file.audio_properties
-        self.end_time = prop.length
-        self.bitrate = prop.bitrate
+        assign_attributes(end_time: prop.length, bitrate: prop.bitrate)
       end
+    end
+  end
+
+  def updated_podcast_file?
+    podcast_file.present? && podcast_file_changed?
+  end
+
+  def publishable
+    if published? && !podcast_file.present?
+      self.errors[:base] = "Podcast cannot be published without an associated podcast file"
     end
   end
 end
