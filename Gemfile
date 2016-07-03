@@ -8,10 +8,6 @@ gem 'rails-api', '~> 0.4'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
 
-# Use SCSS for stylesheets
-#gem 'sass-rails', '~> 5.0'
-# Use Uglifier as compressor for JavaScript assets
-gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.1.0'
 # Use ActiveModel::Serializers to serialize ActiveModel/ActiveRecord objects
@@ -24,11 +20,25 @@ gem 'taglib-ruby'
 # Carrierwave used for uploading podcast audio data
 gem 'carrierwave'
 # Puma used for hosting rails server
-gem 'puma'
+#gem 'puma'
+
+# Web specific gems
+# Use SCSS for stylesheets
+gem 'sass-rails', '~> 5.0'
+# Use Uglifier as compressor for JavaScript assets
+gem 'uglifier', '>= 1.3.0'
+# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
+gem 'turbolinks'
+# bootstrap HTML, CSS, JS Framework used for client interface
+gem 'bootstrap-sass'
+# Use jquery as the JavaScript library
+gem 'jquery-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
+  # debugging environment more sophisticated than byebug
+  gem 'pry-rails'
   # replacement for fixtures for test data
   gem 'factory_girl_rails'
   # Used for generating fake date

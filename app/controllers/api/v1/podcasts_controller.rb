@@ -5,7 +5,10 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
   before_action :correct_podcast, only: [:publish, :unpublish, :update, :destroy]
 
   def show
-    render json: @podcast
+    respond_to do |format|
+      format.html
+      format.json { render json: @podcast }
+    end
   end
 
   def index
@@ -33,6 +36,14 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
   def destroy
     @podcast.destroy
     head 204
+  end
+
+  def upload
+    @podcast = Podcast.find(params[:id])
+    @podcast.store_podcast_file(params)
+
+    response_params = params.slice(:chunk_number, :chunk_size, :chunk_progress, :total_size)
+    render json: { upload_status: response_params }, status: 200
   end
 
   protected

@@ -26,6 +26,7 @@ Rails.application.routes.draw do
         member do
           post :publish
           delete :unpublish
+          post :upload
         end
       end
       resources :timestamps,          only: [:show, :update, :destroy]
@@ -34,6 +35,16 @@ Rails.application.routes.draw do
           post :publish
           delete :unpublish
         end
+      end
+    end
+  end
+
+
+  scope module: "api/v1", constraints: ApiConstraints.new(version: 1, default: true) do
+    resources :podcasts, only: [:show, :create] do
+      member do
+        get :upload
+        post :upload
       end
     end
   end

@@ -1,0 +1,21 @@
+<h1>Podcast Upload Status</h1>
+
+<section class="podcast_files">
+  <%= render @podcast %>
+</section>
+
+<%= form_for @podcast, html: { class: 'podcast_file_submit' } do |podcast| %>
+  <span class="btn btn-mini btn-success podcast-upload">
+    <i class="glyphicon glyphicon-plus"></i>
+    <span>Select Podcast File...</span>
+  </span>
+  <%= podcast.file_field :podcast_file, accept: 'audio/' %>
+  <%= podcast.submit %>
+<% end %>
+
+<!-- TODO: display upload status -->
+<div class="row">
+  <div id="progress" class="progress">
+    <div class="progress-bar progress-bar-success"></div>
+  </div>
+</div>
