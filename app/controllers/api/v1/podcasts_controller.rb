@@ -40,10 +40,21 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
 
   def upload
     @podcast = Podcast.find(params[:id])
-    @podcast.store_podcast_file(params)
+    chunked_upload = store_podcast_chunk(params)
+    response_params = params.slice(:total_size).merge!(chunk_id: chunked_upload.id)
 
-    response_params = params.slice(:chunk_number, :chunk_size, :chunk_progress, :total_size)
-    render json: { upload_status: response_params }, status: 200
+    unless chunked_upload.finished
+      render json: { upload_status: response_params }, status: 200 and return
+    end
+
+    chunked_upload.read do |completed_file|
+      @podcast.store_podcast_file(completed_file)
+    end
+    if @podcast.valid?
+      render json: { upload_status: response_params.merge(completed: true) }, status: 200
+    else
+      render json: ErrorSerializer.serialize(@podcast.errors), status: 422
+    end
   end
 
   protected
@@ -73,5 +84,12 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     def valid_podcast
       @podcast = Podcast.find_by id: params[:id]
       render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 and return unless @podcast
+    end
+
+    def store_podcast_chunk(params)
+      chunked_upload = ChunkedUpload.new(@podcast, params[:chunk_id])
+      chunked_upload.store_chunk(params)
+
+      chunked_upload
     end
 end

@@ -16,37 +16,6 @@ class PodcastFileUploader < CarrierWave::Uploader::Base
     "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
   end
 
-  def store_temp_file(params)
-    chunk = params[:chunk_data]
-    cleaned_filename = PodcastFileUploader.sanitize(chunk.original_filename)
-    chunk_filename = cleaned_filename + '.part.' + params[:chunk_number]
-    full_dest_name = full_store_dir + '/' + chunk_filename
-    FileUtils.copy(chunk.tempfile.path, full_dest_name)
-
-    # TODO: have sanity checking locally. Record local progress somehow
-    if params[:completed] && params[:chunk_progress] == params[:total_size]
-      full_dest_name = full_store_dir + '/' + cleaned_filename
-      file_part_names = Dir.glob(full_dest_name + '.part.*').sort
-
-      # write chunks to single file
-      File.open(full_dest_name, 'wb') do |file|
-        file_part_names.each do |part_name|
-          File.open(part_name) do |part_file|
-            while buffer = part_file.read(4096)
-              file.write buffer
-            end
-          end
-        end
-      end
-
-      # cleanup part files
-      file_part_names.each do |part_name|
-        File.delete(part_name)
-      end
-    end
-    # TODO: handle deleting files on failure/background job to cleanup after timeout
-  end
-
   def self.sanitize(filename)
     filename.gsub(/[[:space:]]/, '_')
   end

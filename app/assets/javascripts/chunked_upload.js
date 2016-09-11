@@ -52,7 +52,6 @@ var chunkedUpload = {
     var chunkOptions = {
       chunkProgress: 0,
       contentType: fileElement.accept,
-      chunkCount: 0,
       file: files[0]
     };
 
@@ -68,30 +67,24 @@ var chunkedUpload = {
       return;
     }
 
-    var chunk_name = file.name + '.part.' + coptions.chunkCount
     var currentChunkSize = ((coptions.chunkProgress + chunkedUpload.chunkSize) > file.size) ? file.size - coptions.chunkProgress : chunkedUpload.chunkSize;
     var chunk = file.slice(coptions.chunkProgress, coptions.chunkProgress + currentChunkSize, coptions.contentType);
 
     coptions.chunkProgress += currentChunkSize;
-    coptions.chunkCount++;
 
     // submit using FormData API
     var fd = new FormData();
-    fd.append('chunk_size', chunk.size);
-    fd.append('chunk_progress', coptions.chunkProgress);
     fd.append('total_size', file.size);
-    fd.append('chunk_number', coptions.chunkCount);
     fd.append('chunk_data', chunk, file.name);
-    
-    // final file request
-    if (coptions.chunkProgress == file.size) {
-      fd.append('completed', true);
+    if (coptions.chunkId) {
+      fd.append('chunk_id', coptions.chunkId);
     }
 
     aoptions.data = fd;
 
     $.ajax(aoptions)
       .done(function(data, status, xhr) {
+        coptions.chunkId = data.upload_status.chunk_id;
         chunkedUpload.chunkedFileSubmit(coptions, aoptions, callbacks);
         callbacks.chunkCompleted(callbacks.formElement);
       })

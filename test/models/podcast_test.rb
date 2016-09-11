@@ -77,6 +77,15 @@ class PodcastTest < ActiveSupport::TestCase
     assert @podcast.valid?
   end
 
+  # store_podcast_file
+
+  test "store_podcast_file sets podcast_file and saves record" do
+    @podcast.podcast_file = nil
+    @podcast.store_podcast_file(fixture_file_upload('podcasts/piano-loop.mp3', 'audio/mpeg'))
+    assert @podcast.changes.empty?
+    assert @podcast.file_upload.present?
+  end
+
   # end_time
 
   test "end_time must be present on valid podcast_file" do

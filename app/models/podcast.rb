@@ -76,8 +76,9 @@ class Podcast < ActiveRecord::Base
     bitrate = nil
   end
 
-  def store_podcast_file(params)
-    podcast_file.store_temp_file(params)
+  def store_podcast_file(file)
+    self.podcast_file = file
+    save
   end
 
   private
