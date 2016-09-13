@@ -3,7 +3,10 @@ $(document).ready(function() {
     fileNotFoundHandler: function(fileElem) {
       alert("No file provided");
     },
-    chunkCompleted: function(fileElem) {
+    chunkCompleted: function(fileElem, coptions) {
+      console.log(coptions);
+      //$(".progress-bar").attr("aria-valuenow", coptions.progress);
+      $(".progress-bar").css("width", coptions.progress+'%');
       console.log("Chunk Completed");
     },
     completed: function(fileElem) {

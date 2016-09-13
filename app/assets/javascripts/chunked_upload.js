@@ -21,7 +21,7 @@ var chunkedUpload = {
       return;
     }
 
-    var element = $(e.target)
+    var element = $(e.target);
     var fileElements = element.children(':input[type=file]');
     var ajaxOptions = {
       method: element.attr('method'),
@@ -84,9 +84,12 @@ var chunkedUpload = {
 
     $.ajax(aoptions)
       .done(function(data, status, xhr) {
+        console.log(data.upload_status);
         coptions.chunkId = data.upload_status.chunk_id;
+        coptions.progress = data.upload_status.progress;
+        callbacks.chunkCompleted(callbacks.formElement, coptions);
+
         chunkedUpload.chunkedFileSubmit(coptions, aoptions, callbacks);
-        callbacks.chunkCompleted(callbacks.formElement);
       })
       .fail(function(xhr, status, error) {
         callbacks.failed(callbacks.formElement);

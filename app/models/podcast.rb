@@ -77,6 +77,7 @@ class Podcast < ActiveRecord::Base
   end
 
   def store_podcast_file(file)
+    self.chunk_id = nil
     self.podcast_file = file
     save
   end

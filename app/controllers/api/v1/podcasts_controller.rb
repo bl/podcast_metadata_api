@@ -41,7 +41,7 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
   def upload
     @podcast = Podcast.find(params[:id])
     chunked_upload = store_podcast_chunk(params)
-    response_params = params.slice(:total_size).merge!(chunk_id: chunked_upload.id)
+    response_params = params.slice(:total_size).merge!(chunked_upload.attributes)
 
     unless chunked_upload.finished
       render json: { upload_status: response_params }, status: 200 and return
@@ -50,6 +50,8 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     chunked_upload.read do |completed_file|
       @podcast.store_podcast_file(completed_file)
     end
+    chunked_upload.cleanup
+
     if @podcast.valid?
       render json: { upload_status: response_params.merge(completed: true) }, status: 200
     else
@@ -87,7 +89,7 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     end
 
     def store_podcast_chunk(params)
-      chunked_upload = ChunkedUpload.new(@podcast, params[:chunk_id])
+      chunked_upload = ChunkedUpload.new(@podcast)
       chunked_upload.store_chunk(params)
 
       chunked_upload

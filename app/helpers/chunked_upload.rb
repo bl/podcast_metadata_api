@@ -1,30 +1,38 @@
 class ChunkedUpload
   attr_reader :resource
-  attr_accessor :finished, :id
+  attr_accessor :finished, :id, :progress
 
   def self.sanitize(filename)
     filename.gsub(/[[:space:]]/, '_')
   end
 
-  def initialize(resource, id = nil)
-    @resource, @finished = resource, false
-    @id = id || SecureRandom.hex
+  def initialize(resource)
+    @resource, @finished, @progress = resource, false, 0
     FileUtils.mkdir_p(store_dir)
+  end
+
+  def attributes
+    {
+      finished: finished,
+      chunk_id: id,
+      progress: progress,
+    }
   end
 
   # TODO generate a key to use for each (store_chunk) (SecureRandom.uuid filename maybe?)
   def store_chunk(params)
     chunk = params[:chunk_data]
+    ext = File.extname(chunk.original_filename)
+    set_id(ext)
     chunk_filename = "#{id}.part.#{current_chunk_number}"
     FileUtils.copy(chunk.tempfile.path, store_dir(chunk_filename))
-    ext = File.extname(chunk.original_filename)
 
-    File.open(store_dir(id) + ext, 'ab') do |result_file|
+    File.open(store_dir(id), 'ab') do |result_file|
       while buffer = chunk.tempfile.read(4096)
         result_file.write buffer
       end
 
-      # TODO: have sanity checking locally. Record local progress somehow
+      # TODO: have sanity checking locally
       if result_file.size == params[:total_size].to_i
         file_part_names = Dir.glob("#{store_dir(id)}.part.*").sort
 
@@ -35,6 +43,8 @@ class ChunkedUpload
 
         self.finished = true
       end
+
+      @progress = result_file.size / params[:total_size].to_d * 100
     end
     # TODO: handle deleting files on failure/background job to cleanup after timeout
   end
@@ -45,7 +55,22 @@ class ChunkedUpload
     end
   end
 
+  def cleanup
+    @resource.update(chunk_id: nil)
+    File.delete(store_dir(id))
+  end
+
   private
+
+  def set_id(ext)
+    if @resource.chunk_id
+      # TODO: properly handle resuming existing chunked uploads
+      @id = @resource.chunk_id
+    else
+      @id = SecureRandom.hex + ext
+      @resource.update(chunk_id: @id)
+    end
+  end
 
   def resource_dir
     "#{resource.class.to_s.underscore}/#{resource.id}"
