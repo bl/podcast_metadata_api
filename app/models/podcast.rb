@@ -6,6 +6,7 @@ class Podcast < ActiveRecord::Base
 
   belongs_to :series
   has_many :timestamps, dependent: :destroy
+  has_one :upload, dependent: :destroy
 
   mount_uploader :podcast_file, PodcastFileUploader
 

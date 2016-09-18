@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160911225143) do
+ActiveRecord::Schema.define(version: 20160918111217) do
 
   create_table "articles", force: :cascade do |t|
     t.text     "content"
@@ -35,7 +35,6 @@ ActiveRecord::Schema.define(version: 20160911225143) do
     t.datetime "updated_at",                   null: false
     t.integer  "series_id"
     t.datetime "published_at"
-    t.string   "chunk_id"
   end
 
   add_index "podcasts", ["published_at"], name: "index_podcasts_on_published_at"
@@ -68,6 +67,19 @@ ActiveRecord::Schema.define(version: 20160911225143) do
 
   add_index "timestamps", ["article_id"], name: "index_timestamps_on_article_id"
   add_index "timestamps", ["podcast_id"], name: "index_timestamps_on_podcast_id"
+
+  create_table "uploads", force: :cascade do |t|
+    t.string   "chunk_id",     null: false
+    t.integer  "total_size"
+    t.string   "ext"
+    t.integer  "subject_id"
+    t.string   "subject_type"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "uploads", ["chunk_id"], name: "index_uploads_on_chunk_id", unique: true
+  add_index "uploads", ["subject_type", "subject_id"], name: "index_uploads_on_subject_type_and_subject_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
