@@ -12,9 +12,9 @@ class PodcastFileUploader < CarrierWave::Uploader::Base
 
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
-  def store_dir
-    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
-  end
+  #def store_dir
+    #"uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  #end
 
   def self.sanitize(filename)
     filename.gsub(/[[:space:]]/, '_')
@@ -27,9 +27,9 @@ class PodcastFileUploader < CarrierWave::Uploader::Base
 
   private
 
-  def full_store_dir
-    Rails.root.to_path + '/public/' + store_dir
-  end
+  #def full_store_dir
+    #Rails.root.to_path + '/public/' + store_dir
+  #end
 
   # Provide a default URL as a default if there hasn't been a file uploaded:
   # def default_url

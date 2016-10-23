@@ -1,91 +1,115 @@
 class ChunkedUpload
-  attr_reader :resource
-  attr_accessor :finished, :id, :progress
+  attr_accessor :upload
 
-  def self.sanitize(filename)
-    filename.gsub(/[[:space:]]/, '_')
+  #def self.sanitize(filename)
+    #filename.gsub(/[[:space:]]/, '_')
+  #end
+
+  def initialize(upload)
+    #@upload, @finished, @progress_size, @total_size = upload, false, 0, 0
+    @upload = upload
+    FileUtils.mkdir_p(upload.store_dir)
   end
 
-  def initialize(resource)
-    @resource, @finished, @progress = resource, false, 0
-    FileUtils.mkdir_p(store_dir)
+  #def attributes
+    #{
+      #finished: finished,
+      #chunk_id: id,
+      #progress: progress_size / total_size.to_d * 100
+      #progress_size: progress_size,
+      ##@progress = @progress_size / params[:total_size].to_d * 100
+      #total_size: total_size
+    #}
+  #end
+
+  #def id
+    #return @id if @id
+
+    #if upload.chunk_id
+      ## TODO: properly handle resuming existing chunked uploads
+      #@id = upload.chunk_id
+    #else
+      #@id = SecureRandom.hex
+      #upload.update(chunk_id: @id)
+    #end
+  #end
+
+  #def ext
+    #return @ext if @ext
+
+    #unless upload.chunk_ext
+      #upload.update(chunk_ext: File.extname(chunk.original_filename))
+    #end
+  #end
+
+  def build_upload(params)
+    #upload.total_size = params[:total_size]
+    #upload.ext  = File.extname(params[:data].original_filename)
+    upload.update(
+      total_size: params[:total_size].to_i,
+      ext: File.extname(params[:data].original_filename)[1..-1]
+    )
   end
 
-  def attributes
-    {
-      finished: finished,
-      chunk_id: id,
-      progress: progress,
-    }
-  end
-
-  # TODO generate a key to use for each (store_chunk) (SecureRandom.uuid filename maybe?)
   def store_chunk(params)
-    chunk = params[:chunk_data]
-    ext = File.extname(chunk.original_filename)
-    set_id(ext)
-    chunk_filename = "#{id}.part.#{current_chunk_number}"
-    FileUtils.copy(chunk.tempfile.path, store_dir(chunk_filename))
+    chunk = params[:data]
+    build_upload(params) unless upload.persisted?
 
-    File.open(store_dir(id), 'ab') do |result_file|
+    chunk_filename = "#{upload.filename}.part.#{current_chunk_number}"
+    FileUtils.copy(chunk.tempfile.path, upload.store_dir(chunk_filename))
+
+    File.open(upload.file_dir, 'ab') do |result_file|
       while buffer = chunk.tempfile.read(4096)
-        result_file.write buffer
+        result_file.write(buffer)
       end
 
-      # TODO: have sanity checking locally
-      if result_file.size == params[:total_size].to_i
-        file_part_names = Dir.glob("#{store_dir(id)}.part.*").sort
-
-        # cleanup part files
-        file_part_names.each do |part_name|
-          File.delete(part_name)
-        end
-
-        self.finished = true
+      if result_file.size == upload.total_size
+        cleanup_part_files
       end
-
-      @progress = result_file.size / params[:total_size].to_d * 100
     end
     # TODO: handle deleting files on failure/background job to cleanup after timeout
   end
 
   def read(&block)
-    File.open(store_dir(id), 'r') do |final_file|
+    File.open(upload.file_dir, 'r') do |final_file|
       yield final_file
     end
   end
 
   def cleanup
-    @resource.update(chunk_id: nil)
-    File.delete(store_dir(id))
+    cleanup_part_files
+    File.delete(upload.file_dir)
+    @upload.update(chunk_id: nil)
   end
 
   private
 
-  def set_id(ext)
-    if @resource.chunk_id
-      # TODO: properly handle resuming existing chunked uploads
-      @id = @resource.chunk_id
-    else
-      @id = SecureRandom.hex + ext
-      @resource.update(chunk_id: @id)
+  def cleanup_part_files
+    file_part_names = Dir.glob("#{upload.file_dir}.part.*")
+
+    file_part_names.each do |part_name|
+      File.delete(part_name)
     end
   end
 
-  def resource_dir
-    "#{resource.class.to_s.underscore}/#{resource.id}"
-  end
+  #def resource_dir
+    #"#{upload.class.to_s.underscore}/#{upload.id}"
+  #end
 
-  def store_dir(filename = nil)
-    dir = "#{Rails.root.to_path}/public/chunked_uploads/#{resource_dir}"
-    "#{dir}/#{filename}" if filename || dir
-  end
+  #def store_dir(filename = nil)
+    #dir = "#{Rails.root.to_path}/public/chunked_uploads/#{resource_dir}"
+    #"#{dir}/#{filename}" if filename || dir
+  #end
 
   def current_chunk_number
-    total_chunks = Dir.glob("#{store_dir(id)}.part.*").map do |path|
+    total_chunks = Dir.glob("#{upload.store_dir}.part.*").map do |path|
       File.extname(path)[1..-1].to_i
     end
     most_recent = total_chunks.sort.last || -1
     most_recent + 1
   end
+
+  #def valid_params(params)
+    #params[:chunk_data] && params[:total_size]
+  #end
 end

@@ -29,4 +29,16 @@ class UploadTest < ActiveSupport::TestCase
   test "#destroy cleans up any created file uploads" do
     assert false
   end
+
+  test "#chunk_id should not change on multiple saves" do
+    chunk_id = @upload.chunk_id
+    @upload.save
+    assert_equal chunk_id, @upload.reload.chunk_id
+  end
+
+  test "#chunk_id is assigned on create" do
+    @upload.chunk_id = nil
+    @upload.save
+    assert @upload.chunk_id
+  end
 end

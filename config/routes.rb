@@ -27,6 +27,7 @@ Rails.application.routes.draw do
           post :publish
           delete :unpublish
           post :upload
+          get :status
         end
       end
       resources :timestamps,          only: [:show, :update, :destroy]
@@ -44,7 +45,6 @@ Rails.application.routes.draw do
     resources :podcasts, only: [:show, :create] do
       member do
         get :upload
-        post :upload
       end
     end
   end

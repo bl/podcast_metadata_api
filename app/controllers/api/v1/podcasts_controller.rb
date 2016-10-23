@@ -38,13 +38,20 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     head 204
   end
 
-  def upload
-    @podcast = Podcast.find(params[:id])
-    chunked_upload = store_podcast_chunk(params)
-    response_params = params.slice(:total_size).merge!(chunked_upload.attributes)
+  def status
+    render json: { upload: @podcast.upload }, status: 200
+  end
 
-    unless chunked_upload.finished
-      render json: { upload_status: response_params }, status: 200 and return
+  def upload
+    # TODO: use correct_podcast once implementation works
+    @podcast = Podcast.find(params[:id])
+
+    upload = @podcast.upload || @podcast.build_upload
+    chunked_upload = ChunkedUpload.new(upload)
+    chunked_upload.store_chunk(chunk_params)
+
+    unless upload.finished?
+      render json: upload, status: 200 and return
     end
 
     chunked_upload.read do |completed_file|
@@ -53,7 +60,7 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     chunked_upload.cleanup
 
     if @podcast.valid?
-      render json: { upload_status: response_params.merge(completed: true) }, status: 200
+      render json: upload, status: 200
     else
       render json: ErrorSerializer.serialize(@podcast.errors), status: 422
     end
@@ -72,6 +79,10 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
       params.require(:podcast).permit(:title, :podcast_file, :remote_podcast_file_url)
     end
 
+    def chunk_params
+      params.require(:upload).permit(:total_size, :data)
+    end
+
     def correct_podcast
       @podcast ||= current_user.podcasts.find_by id: params[:id]
       render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 unless @podcast
@@ -86,12 +97,5 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     def valid_podcast
       @podcast = Podcast.find_by id: params[:id]
       render json: ErrorSerializer.serialize(podcast: "is invalid"), status: 422 and return unless @podcast
-    end
-
-    def store_podcast_chunk(params)
-      chunked_upload = ChunkedUpload.new(@podcast)
-      chunked_upload.store_chunk(params)
-
-      chunked_upload
     end
 end
