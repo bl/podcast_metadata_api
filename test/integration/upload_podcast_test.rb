@@ -19,10 +19,10 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
     post upload_api_podcast_path(@podcast), upload: upload_params
 
     upload = JSON.parse response.body
-    assert @podcast.podcast_file.present?
+    assert @podcast.reload.podcast_file.present?
   end
 
-  #test "upload successful in multiple chunks" do
+  test "upload successful in multiple chunks" do
 
-  #end
+  end
 end

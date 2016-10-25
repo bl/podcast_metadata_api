@@ -36,9 +36,15 @@ class UploadTest < ActiveSupport::TestCase
     assert_equal chunk_id, @upload.reload.chunk_id
   end
 
-  test "#chunk_id is assigned on create" do
+  test "#chunk_id is assigned on validation if not present" do
     @upload.chunk_id = nil
     @upload.save
     assert @upload.chunk_id
+  end
+
+  test "#chunk_size is assigned on validation if not present" do
+    @upload.chunk_size = nil
+    @upload.save
+    assert_equal @upload.chunk_size, Upload.CHUNK_SIZE
   end
 end

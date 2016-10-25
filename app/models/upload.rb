@@ -1,16 +1,22 @@
 class Upload < ActiveRecord::Base
   before_validation :generate_id, unless: -> { chunk_id.present? }
+  before_validation :set_chunk_size, unless: -> { chunk_size.present? }
   before_destroy { ChunkedUpload.new(self).cleanup }
 
   belongs_to :subject, polymorphic: true
 
   validates :chunk_id,      presence: true
+  validates :chunk_size,    presence: true
   validates :total_size,    presence: true,
                             numericality: { greater_than: 0 }
   validates :ext,           presence: true
 
   validates :subject,       presence: true
   validates :subject_type,  inclusion: { in: %w(Podcast) }
+
+  def self.CHUNK_SIZE
+    2**20
+  end
 
   def progress
     progress_size / total_size.to_d * 100
@@ -49,5 +55,9 @@ class Upload < ActiveRecord::Base
 
   def generate_id
     self.chunk_id = SecureRandom.hex
+  end
+
+  def set_chunk_size
+    self.chunk_size = Upload.CHUNK_SIZE
   end
 end
