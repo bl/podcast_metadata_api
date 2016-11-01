@@ -43,17 +43,17 @@ class ChunkedUpload
   #end
 
   def build_upload(params)
-    #upload.total_size = params[:total_size]
-    #upload.ext  = File.extname(params[:data].original_filename)
     upload.update(
       total_size: params[:total_size].to_i,
-      ext: File.extname(params[:data].original_filename)[1..-1]
+      ext: ext_from(params[:data].content_type)
     )
   end
 
   def store_chunk(params)
     chunk = params[:data]
-    build_upload(params) unless upload.persisted?
+    unless upload.persisted?
+      return unless build_upload(params)
+    end
 
     chunk_filename = "#{upload.filename}.part.#{current_chunk_number}"
     FileUtils.copy(chunk.tempfile.path, upload.store_dir(chunk_filename))
@@ -84,6 +84,13 @@ class ChunkedUpload
 
   private
 
+  def ext_from(content_type)
+    case content_type
+    when %r{audio/(mp3|mp4)}
+      $1
+    end
+  end
+
   def cleanup_part_files
     file_part_names = Dir.glob("#{upload.file_dir}.part.*")
 
@@ -102,7 +109,7 @@ class ChunkedUpload
   #end
 
   def current_chunk_number
-    total_chunks = Dir.glob("#{upload.store_dir}.part.*").map do |path|
+    total_chunks = Dir.glob("#{upload.file_dir}.part.*").map do |path|
       File.extname(path)[1..-1].to_i
     end
     most_recent = total_chunks.sort.last || -1

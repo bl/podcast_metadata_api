@@ -1,5 +1,5 @@
 class ErrorSerializer
-  def ErrorSerializer.serialize(errors, options = {})
+  def self.serialize(errors, options = {})
     JsonSerializer.serialize(:errors, errors, options)
   end
 end

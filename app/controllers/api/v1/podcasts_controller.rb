@@ -39,7 +39,9 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
   end
 
   def status
-    render json: { upload: @podcast.upload }, status: 200
+    # TODO: use correct_podcast once implementation works
+    @podcast = Podcast.find(params[:id])
+    render json: @podcast.upload, status: 200
   end
 
   def upload
@@ -50,14 +52,12 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     chunked_upload = ChunkedUpload.new(upload)
     chunked_upload.store_chunk(chunk_params)
 
-    unless upload.finished?
-      render json: upload, status: 200 and return
+    if upload.valid? && upload.finished?
+      chunked_upload.read do |completed_file|
+        @podcast.store_podcast_file(completed_file)
+      end
+      chunked_upload.cleanup
     end
-
-    chunked_upload.read do |completed_file|
-      @podcast.store_podcast_file(completed_file)
-    end
-    chunked_upload.cleanup
 
     if @podcast.valid?
       render json: upload, status: 200
