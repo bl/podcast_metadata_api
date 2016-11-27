@@ -39,6 +39,8 @@ group :development, :test do
   gem 'byebug'
   # debugging environment more sophisticated than byebug
   gem 'pry-rails'
+  # enable 'continue/step' commands in pry
+  gem 'pry-byebug'
   # replacement for fixtures for test data
   gem 'factory_girl_rails'
   # Used for generating fake date
