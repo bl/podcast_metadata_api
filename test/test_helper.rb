@@ -12,8 +12,8 @@ class ActiveSupport::TestCase
   # mixin background job tests for ActionMailer email deliver_later's
   include ActiveJob::TestHelper
 
-  def open_podcast_file(file_name)
-   fixture_file_upload("podcasts/#{file_name}", 'audio/') 
+  def open_podcast_file(file_name, content_type = 'audio/')
+   fixture_file_upload("podcasts/#{file_name}", content_type)
   end
 
   # return json from response body

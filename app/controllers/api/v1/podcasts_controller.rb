@@ -56,11 +56,13 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
       chunked_upload.read do |completed_file|
         @podcast.store_podcast_file(completed_file)
       end
-      chunked_upload.cleanup
     end
 
     if @podcast.valid?
       render json: upload, status: 200
+
+      # cleanup after rendering above
+      upload.destroy if upload.finished?
     else
       render json: ErrorSerializer.serialize(@podcast.errors), status: 422
     end

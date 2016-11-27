@@ -7,10 +7,12 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
     @podcast = FactoryGirl.create :podcast
     @podcast.remove_podcast_file!
     @podcast.save
+
+    @user = @podcast.series.user
   end
 
   test "upload successful on valid audio file" do
-    podcast_file = open_podcast_file('piano-loop.mp3')
+    podcast_file = open_podcast_file('piano-loop.mp3', 'audio/mp3')
     upload_params = {
       total_size: podcast_file.size,
       data: podcast_file
@@ -25,7 +27,7 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
   end
 
   test "upload successful in multiple chunks" do
-    podcast_file = open_podcast_file('piano-loop.mp3')
+    podcast_file = open_podcast_file('piano-loop.mp3', 'audio/mp3')
     chunk_size = podcast_file.size / 5
 
     class Upload
@@ -37,6 +39,7 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
     end
 
 
+    upload_progress = 0
     upload_in_chunks(podcast_file, chunk_size) do |chunk|
       upload_params = {
         total_size: podcast_file.size,
@@ -44,12 +47,18 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
       }
 
       post upload_api_podcast_path(@podcast), upload: upload_params
-    end
 
-    get status_api_podcast_path(@podcast)
+      upload = JSON.parse response.body
+      upload_progress += chunk.size
+      assert_equal upload_progress, upload["data"]["attributes"]["progress-size"]
+    end
 
     upload = JSON.parse response.body
     assert upload["data"]["attributes"]["finished?"]
+
+    get_as @user, api_podcast_path(@podcast)
+
+    assert_equal podcast_file.size, assigns(:podcast).podcast_file.size
   end
 
   private
