@@ -86,9 +86,16 @@ class ChunkedUpload
 
   def ext_from(content_type)
     case content_type
-    when %r{audio/(mp3|mp4)}
-      $1
+    when content_type_mp3
+      'mp3'
     end
+  end
+
+  def content_type_mp3
+    Regexp.union(
+      %r{audio/(mpeg|mp3|mpeg3|x-mpeg3)},
+      %r{video/(mpeg|x-mpeg)}
+    )
   end
 
   def cleanup_part_files

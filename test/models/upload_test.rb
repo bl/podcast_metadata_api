@@ -10,6 +10,11 @@ class UploadTest < ActiveSupport::TestCase
     refute @upload.valid?
   end
 
+  test "#user should be present" do
+    @upload.user = nil
+    refute @upload.valid?
+  end
+
   test "#total_size must be present" do
     @upload.total_size = nil
     refute @upload.valid?
@@ -17,20 +22,30 @@ class UploadTest < ActiveSupport::TestCase
 
   test "#total_size must be greater than 0" do
     @upload.total_size = -1
-    refute @upload.valid?
+    @upload.validate
+    assert_equal @upload.errors[:total_size].first, 'must be greater than 0'
 
     @upload.total_size = 0
-    refute @upload.valid?
+    @upload.validate
+    assert_equal @upload.errors[:total_size].first, 'must be greater than 0'
 
     @upload.total_size = 1
-    assert @upload.valid?
+    @upload.validate
+    assert_empty @upload.errors[:total_size]
   end
 
   test "#destroy cleans up any created file uploads" do
-    assert false
+    store_upload
+    assert @upload.chunk_id.present?
+    assert @upload.chunk.present?
+    file_dir = @upload.file_dir
+
+    @upload.destroy
+    refute File.file?(file_dir)
   end
 
   test "#chunk_id should not change on multiple saves" do
+    store_upload
     chunk_id = @upload.chunk_id
     @upload.save
     assert_equal chunk_id, @upload.reload.chunk_id
@@ -46,5 +61,15 @@ class UploadTest < ActiveSupport::TestCase
     @upload.chunk_size = nil
     @upload.save
     assert_equal @upload.chunk_size, Upload.CHUNK_SIZE
+  end
+
+  private
+
+  def store_upload
+    upload_file = fixture_file_upload("podcasts/piano-loop.mp3", "audio/mpeg")
+    ChunkedUpload.new(@upload).store_chunk(
+      data: upload_file,
+      total_size: upload_file.size
+    )
   end
 end

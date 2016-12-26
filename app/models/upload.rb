@@ -4,6 +4,7 @@ class Upload < ActiveRecord::Base
   before_destroy { ChunkedUpload.new(self).cleanup }
 
   belongs_to :subject, polymorphic: true
+  belongs_to :user
 
   validates :chunk_id,      presence: true
   validates :chunk_size,    presence: true
@@ -13,6 +14,7 @@ class Upload < ActiveRecord::Base
 
   validates :subject,       presence: true
   validates :subject_type,  inclusion: { in: %w(Podcast) }
+  validates :user_id,       presence: true
 
   def self.CHUNK_SIZE
     2**20

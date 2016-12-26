@@ -21,8 +21,8 @@ FactoryGirl.define do
       timestamps_count 3
     end
 
-    after(:create) do |podcast, elevator|
-      create_list(:timestamp, elevator.timestamps_count, podcast: podcast, podcast_end_time: podcast.end_time)
+    after(:create) do |podcast, evaluator|
+      create_list(:timestamp, evaluator.timestamps_count, podcast: podcast, podcast_end_time: podcast.end_time)
     end
   end
 end

@@ -74,6 +74,7 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.string   "ext"
     t.integer  "subject_id"
     t.string   "subject_type"
+    t.integer  "user_id",      null: false
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
     t.integer  "chunk_size"
@@ -81,6 +82,7 @@ ActiveRecord::Schema.define(version: 20161025221025) do
 
   add_index "uploads", ["chunk_id"], name: "index_uploads_on_chunk_id", unique: true
   add_index "uploads", ["subject_type", "subject_id"], name: "index_uploads_on_subject_type_and_subject_id"
+  add_index "uploads", ["user_id"], name: "index_uploads_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
