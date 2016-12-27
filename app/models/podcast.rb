@@ -6,7 +6,7 @@ class Podcast < ActiveRecord::Base
 
   belongs_to :series
   has_many :timestamps, dependent: :destroy
-  has_one :upload,      as: :subject,
+  has_many :uploads,    as: :subject,
                         dependent: :destroy,
                         autosave: true
 
