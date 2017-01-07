@@ -9,6 +9,14 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     @other_upload = FactoryGirl.create :stored_upload
     @other_subject = @other_upload.subject
     @other_user = @other_subject.series.user
+
+    @empty_upload = FactoryGirl.create :upload
+    @empty_subject = @empty_upload.subject
+    @empty_user = @empty_subject.series.user
+
+    @partial_upload = FactoryGirl.create :partial_upload
+    @partial_subject = @partial_upload.subject
+    @partial_user = @partial_subject.series.user
   end
 
   # SHOW
@@ -80,12 +88,90 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     assert_response :created
   end
 
+  # UPDATE
+
+  test "update should return json errors when not logged-in" do
+    patch :update, id: @upload, upload: valid_post_params
+    validate_response json_response[:errors], /user/, /not authenticated/
+
+    assert_response :unauthorized
+  end
+
+  test "should return json errors when updating non-logged users resource" do
+    patch_as @other_user, :update, id: @upload, upload: valid_post_params
+    validate_response json_response[:errors], /upload/, /is invalid/
+
+    assert_response :unprocessable_entity
+  end
+
+  test "update should return json errors when using invalid resource id" do
+    patch_as @user, :update, id: -1, upload: valid_post_params
+    validate_response json_response[:errors], /upload/, /is invalid/
+
+    assert_response :unprocessable_entity
+  end
+
+  test "#update should return json errors when provided chunk size is incorrect" do
+    @partial_upload.update(chunk_size: 10)
+
+    patch_as @partial_user, :update, id: @partial_upload, upload: valid_chunk_params
+    validate_response json_response[:errors], /chunk/, /is incorrect size. Use provided upload chunk size/
+
+    assert_response :unprocessable_entity
+  end
+
+  test "#update should return json errors when upload is already finished" do
+    patch_as @user, :update, id: @upload, upload: valid_chunk_params
+    validate_response json_response[:errors], /upload/, /has already been completed/
+
+    assert_response :unprocessable_entity
+  end
+
+  test "#update should return json errors when chunk is not present" do
+    patch_as @empty_user, :update, id: @empty_upload, upload: { data: '' }
+    validate_response json_response[:errors], /chunk/, /is not present/
+
+    assert_response :unprocessable_entity
+  end
+
+  test "#update should return valid json after successful chunk upload" do
+    patch_as @empty_user, :update, id: @empty_upload, upload: valid_chunk_params
+
+    upload_response = json_response[:data]
+    assert_not_nil upload_response
+    assert_equal valid_chunk_params[:data].size, upload_response[:attributes][:'progress-size']
+  end
+
+  test "#update should update associated resource when upload is complete" do
+    @empty_upload.subject.remove_podcast_file!
+    @empty_upload.update(chunk_size: valid_completed_chunk_params[:data].size)
+
+    patch_as @empty_user, :update, id: @empty_upload, upload: valid_completed_chunk_params
+
+    upload_response = json_response[:data]
+    assert_not_nil upload_response
+    assert upload_response[:attributes][:finished?]
+    assert_predicate @empty_upload.subject.reload.podcast_file, :present?
+  end
+
   private
 
   def valid_post_params
     {
       total_size: 1737212,
       ext: 'mp3'
+    }
+  end
+
+  def valid_chunk_params
+    @valid_chunk_params ||= {
+      data: fixture_file_upload("podcasts/piano-loop-chunk", "audio/mpeg")
+    }
+  end
+
+  def valid_completed_chunk_params
+    @valid_completed_chunk_params ||= {
+      data: fixture_file_upload("podcasts/piano-loop.mp3", "audio/mpeg")
     }
   end
 

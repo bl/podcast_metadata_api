@@ -1,7 +1,8 @@
 class Api::V1::UploadsController < ApplicationController
-  before_action :logged_in_user, only: [:show, :create]
-  before_action :correct_parent, only: [:create]
-  before_action :correct_upload, only: [:show, :update]
+  before_action :logged_in_user,   only: [:show, :create, :update]
+  before_action :correct_parent,   only: [:create]
+  before_action :correct_upload,   only: [:show, :update]
+  before_action :completed_upload, only: [:update]
 
   def show
     render json: @upload, status: :ok
@@ -21,6 +22,23 @@ class Api::V1::UploadsController < ApplicationController
   end
 
   def update
+    chunked_upload = ChunkedUpload.new(@upload)
+    chunked_upload.store_chunk(chunk_params[:data])
+
+    if @upload.valid? && @upload.finished?
+      chunked_upload.read do |completed_file|
+        @upload.subject.store_podcast_file(completed_file)
+      end
+    end
+
+    if @upload.subject.valid?
+      render json: @upload, status: 200
+
+      # cleanup after rendering above
+      #chunked_upload.cleanup
+    else
+      render json: ErrorSerializer.serialize(@upload.subject.errors), status: 422
+    end
   end
 
   private
@@ -30,6 +48,7 @@ class Api::V1::UploadsController < ApplicationController
   end
 
   def chunk_params
+    # TODO smater params validation on :data as a file object (specifically audio)
     params.require(:upload).permit(:data)
   end
 
@@ -46,6 +65,18 @@ class Api::V1::UploadsController < ApplicationController
     @upload ||= Upload.find_by id: params[:id]
     unless @upload && @upload.user == current_user
       render json: ErrorSerializer.serialize(upload: "is invalid"), status: :unprocessable_entity
+      return
+    end
+  end
+
+  def chunked_upload
+    @chunked_upload ||= ChunkedUpload.new(@upload)
+  end
+
+  def completed_upload
+    errors = chunked_upload.validate_chunk(chunk_params[:data])
+    if errors.present?
+      render json: ErrorSerializer.serialize(errors), status: 422
       return
     end
   end

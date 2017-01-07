@@ -66,10 +66,9 @@ class UploadTest < ActiveSupport::TestCase
   private
 
   def store_upload
-    upload_file = fixture_file_upload("podcasts/piano-loop.mp3", "audio/mpeg")
+    @upload.save
     ChunkedUpload.new(@upload).store_chunk(
-      data: upload_file,
-      total_size: upload_file.size
+      fixture_file_upload("podcasts/piano-loop.mp3", "audio/mpeg")
     )
   end
 end
