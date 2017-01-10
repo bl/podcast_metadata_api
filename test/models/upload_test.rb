@@ -5,6 +5,10 @@ class UploadTest < ActiveSupport::TestCase
     @upload = FactoryGirl.build :upload
   end
 
+  def teardown
+    ChunkedUpload.new(@upload).cleanup if Upload.exists?(@upload.id)
+  end
+
   test "#subject should be present" do
     @upload.subject = nil
     refute @upload.valid?

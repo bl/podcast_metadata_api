@@ -49,7 +49,7 @@ class ChunkedUpload
 
   def cleanup
     cleanup_part_files
-    File.delete(upload.file_dir)
+    File.delete(upload.file_dir) if File.exist?(upload.file_dir)
     @upload.update(chunk_id: nil)
   end
 

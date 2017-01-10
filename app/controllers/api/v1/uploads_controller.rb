@@ -1,7 +1,7 @@
 class Api::V1::UploadsController < ApplicationController
-  before_action :logged_in_user,   only: [:show, :create, :update]
+  before_action :logged_in_user,   only: [:show, :create, :update, :destroy]
   before_action :correct_parent,   only: [:create]
-  before_action :correct_upload,   only: [:show, :update]
+  before_action :correct_upload,   only: [:show, :update, :destroy]
   before_action :completed_upload, only: [:update]
 
   def show
@@ -39,6 +39,11 @@ class Api::V1::UploadsController < ApplicationController
     else
       render json: ErrorSerializer.serialize(@upload.subject.errors), status: 422
     end
+  end
+
+  def destroy
+    @upload.destroy
+    head 204
   end
 
   private

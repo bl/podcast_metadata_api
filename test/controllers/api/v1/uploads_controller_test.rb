@@ -19,6 +19,12 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     @partial_user = @partial_subject.series.user
   end
 
+  def teardown
+    [@upload, @other_upload, @empty_upload, @partial_upload].each do |upload|
+      ChunkedUpload.new(upload).cleanup if Upload.exists?(upload.id)
+    end
+  end
+
   # SHOW
 
   test "#show should return json errors on invalid upload id" do
@@ -152,6 +158,46 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     assert_not_nil upload_response
     assert upload_response[:attributes][:finished?]
     assert_predicate @empty_upload.subject.reload.podcast_file, :present?
+  end
+
+  # DELETE
+
+  test "destroy should return authorization error when not logged in" do
+    assert_no_difference 'Upload.count' do
+      delete :destroy, id: @upload
+    end
+    validate_response json_response[:errors], /user/, /not authenticated/
+
+    assert_response :unauthorized
+  end
+
+  test "destroy should return json errors on invalid upload id" do
+    assert_no_difference 'Upload.count' do
+      delete_as @user, :destroy, id: -1
+    end
+    validate_response json_response[:errors], /upload/, /is invalid/
+
+    assert_response 422
+  end
+
+  test "destroy should return json errors on deleting non-logged in users upload" do
+    assert_no_difference 'Upload.count' do
+      delete_as @other_user, :destroy, id: @upload
+    end
+    validate_response json_response[:errors], /upload/, /is invalid/
+
+    assert_response 422
+  end
+
+  test "destroy should return empty payload on valid upload" do
+    upload_file_dir = @upload.file_dir
+    assert_difference 'Upload.count', -1 do
+      delete_as @user, :destroy, id: @upload
+    end
+    assert_empty response.body
+    refute File.exist?(upload_file_dir)
+
+    assert_response 204
   end
 
   private

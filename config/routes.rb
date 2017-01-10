@@ -38,7 +38,7 @@ Rails.application.routes.draw do
           delete :unpublish
         end
       end
-      resources :uploads,             only: [:show, :update]
+      resources :uploads,             only: [:show, :update, :destroy]
     end
   end
 
