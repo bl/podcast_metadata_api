@@ -38,36 +38,6 @@ class Api::V1::PodcastsController < Api::V1::PublishableController
     head 204
   end
 
-  def status
-    # TODO: use correct_podcast once implementation works
-    @podcast = Podcast.find(params[:id])
-    render json: @podcast.upload, status: 200
-  end
-
-  def upload
-    # TODO: use correct_podcast once implementation works
-    @podcast = Podcast.find(params[:id])
-
-    upload = @podcast.upload || @podcast.build_upload
-    chunked_upload = ChunkedUpload.new(upload)
-    chunked_upload.store_chunk(chunk_params)
-
-    if upload.valid? && upload.finished?
-      chunked_upload.read do |completed_file|
-        @podcast.store_podcast_file(completed_file)
-      end
-    end
-
-    if @podcast.valid?
-      render json: upload, status: 200
-
-      # cleanup after rendering above
-      upload.destroy if upload.finished?
-    else
-      render json: ErrorSerializer.serialize(@podcast.errors), status: 422
-    end
-  end
-
   protected
 
   # return the resource (used in base Publishable class)

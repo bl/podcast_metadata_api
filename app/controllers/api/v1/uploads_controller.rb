@@ -33,9 +33,6 @@ class Api::V1::UploadsController < ApplicationController
 
     if @upload.subject.valid?
       render json: @upload, status: 200
-
-      # cleanup after rendering above
-      #chunked_upload.cleanup
     else
       render json: ErrorSerializer.serialize(@upload.subject.errors), status: 422
     end

@@ -27,8 +27,6 @@ Rails.application.routes.draw do
         member do
           post :publish
           delete :unpublish
-          post :upload
-          get :status
         end
       end
       resources :timestamps,          only: [:show, :update, :destroy]
