@@ -32,15 +32,15 @@ class Api::V1::UploadsController < ApplicationController
     end
 
     if @upload.subject.valid?
-      render json: @upload, status: 200
+      render json: @upload, status: :ok
     else
-      render json: ErrorSerializer.serialize(@upload.subject.errors), status: 422
+      render json: ErrorSerializer.serialize(@upload.subject.errors), status: :unprocessable_entity
     end
   end
 
   def destroy
     @upload.destroy
-    head 204
+    head :no_content
   end
 
   private
@@ -78,7 +78,7 @@ class Api::V1::UploadsController < ApplicationController
   def completed_upload
     errors = chunked_upload.validate_chunk(chunk_params[:data])
     if errors.present?
-      render json: ErrorSerializer.serialize(errors), status: 422
+      render json: ErrorSerializer.serialize(errors), status: :unprocessable_entity
       return
     end
   end

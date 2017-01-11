@@ -177,7 +177,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     end
     validate_response json_response[:errors], /upload/, /is invalid/
 
-    assert_response 422
+    assert_response :unprocessable_entity
   end
 
   test "destroy should return json errors on deleting non-logged in users upload" do
@@ -186,7 +186,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     end
     validate_response json_response[:errors], /upload/, /is invalid/
 
-    assert_response 422
+    assert_response :unprocessable_entity
   end
 
   test "destroy should return empty payload on valid upload" do
@@ -197,7 +197,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     assert_empty response.body
     refute File.exist?(upload_file_dir)
 
-    assert_response 204
+    assert_response :no_content
   end
 
   private

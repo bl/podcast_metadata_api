@@ -14,13 +14,24 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
   test "upload successful on valid audio file" do
     podcast_file = open_podcast_file('piano-loop.mp3', 'audio/mp3')
     upload_params = {
-      total_size: podcast_file.size,
+      total_size: 1737212,
+      ext: 'mp3'
+    }
+    chunk_params = {
       data: podcast_file
     }
 
-    post upload_api_podcast_path(@podcast), upload: upload_params
+    post api_podcast_uploads_path(@podcast), { upload: upload_params }, headers_for(@user)
+    assert_response :created
+    upload = json_response
 
-    upload = JSON.parse response.body
+    patch api_upload_path(upload[:data][:id]), { upload: chunk_params }, headers_for(@user)
+    binding.pry
+    assert_response :ok
+    upload = json_response
+
+    #post upload_api_podcast_path(@podcast), upload: upload_params
+
     assert upload["data"]["attributes"]["finished?"]
     assert @podcast.reload.podcast_file.present?
     assert_equal podcast_file.size, @podcast.podcast_file.size
@@ -62,6 +73,10 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def headers_for(user)
+    { 'Authorization' => user.auth_token }
+  end
 
   def upload_in_chunks(file, chunk_size)
     while chunk_data = file.read(chunk_size)

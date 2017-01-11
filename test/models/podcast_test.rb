@@ -83,7 +83,7 @@ class PodcastTest < ActiveSupport::TestCase
     @podcast.podcast_file = nil
     @podcast.store_podcast_file(fixture_file_upload('podcasts/piano-loop.mp3', 'audio/mpeg'))
     assert @podcast.changes.empty?
-    assert @podcast.file_upload.present?
+    assert @podcast.podcast_file.present?
   end
 
   # end_time
