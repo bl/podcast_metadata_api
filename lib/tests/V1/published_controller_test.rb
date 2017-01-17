@@ -126,10 +126,11 @@ module PublishedControllerTest
     get :index, { published_after: resource.published_at }
     assert_response 200
     resources_response = json_response[:data]
-    assert_not_nil resources_response
+    assert_not_predicate resources_response, :empty?
     # verify all resources are ordered on/after given time (using default published-by ordering)
     resources_response.each do |resource_res|
-      assert resource.published_at <= Time.new(resource_res[:attributes][:"published-at"])
+      binding.pry
+      assert resource.published_at <= DateTime.parse(resource_res[:attributes][:"published-at"])
     end
   end
 

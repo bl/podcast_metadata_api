@@ -16,13 +16,25 @@ class PublishedSearch
     end
 
     if params[:published_before].present?
-      @resources = @resources.greater_or_equal_to_published_at(params[:published_before])
+      # TODO: remove conversion below once using StrictParameters
+      published_before = to_datetime(params[:published_before])
+      @resources = @resources.greater_or_equal_to_published_at(published_before)
     end
 
     if params[:published_after].present?
-      @resources = @resources.less_or_equal_to_published_at(params[:published_after])
+      # TODO: remove conversion below once using StrictParameters
+      published_after = to_datetime(params[:published_after])
+      @resources = @resources.less_or_equal_to_published_at(published_after)
     end
 
     @resources
+  end
+
+  private
+
+  def to_datetime(object)
+    return object if object.is_a?(DateTime)
+
+    object.respond_to?(:to_datetime) ? object.to_datetime : Time.zone.parse(object)
   end
 end

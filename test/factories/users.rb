@@ -8,7 +8,7 @@ FactoryGirl.define do
     trait :activated do
       auth_token { User.new_token }
       activated true
-      activated_at { Time.zone.now }
+      activated_at { Time.now.utc }
     end
 
     factory :activated_user, traits: [:activated]
@@ -20,7 +20,11 @@ FactoryGirl.define do
     end
 
     after(:create) do |user, evaluator|
-      create_list(:published_series, evaluator.series_count, user: user)
+      # truncate nanoseconds to 0
+      published_time = Time.now.utc.change(usec: 0)
+      evaluator.series_count.times do
+        create :published_series, user: user, published_at: (published_time -= 5.minutes)
+      end
     end
   end
 
