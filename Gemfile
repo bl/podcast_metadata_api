@@ -21,6 +21,7 @@ gem 'taglib-ruby'
 gem 'carrierwave'
 # Puma used for hosting rails server
 #gem 'puma'
+gem 'json', '>= 1.8.5'
 
 # Web specific gems
 # Use SCSS for stylesheets
