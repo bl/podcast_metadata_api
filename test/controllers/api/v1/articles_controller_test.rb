@@ -13,19 +13,23 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
     # create published articles associated to timestamps for the podcast above
     2.times do
       user = FactoryGirl.create :activated_user
+      published_time = Time.now.utc.change(usec: 0)
       2.times do
-        create_published_article @podcast, user
+        create_published_article @podcast, user, published_at: published_time -= 5.minutes
       end
     end
 
     # user with articles
     @user_with_articles = FactoryGirl.create :activated_user
     @articles = @user_with_articles.articles
+    published_time = Time.now.utc.change(usec: 0)
     2.times do
       # create published article owned by @user_with_articles on @podcast
-      create_published_article @podcast, @user_with_articles
+      create_published_article @podcast, @user_with_articles, published_at: published_time
       # create unpublished article
-      @articles.create (FactoryGirl.attributes_for :article)
+      @articles.create (FactoryGirl.attributes_for :article, published_at: published_time)
+
+      published_time -= 5.minutes
     end
 
     # create non-published articles
@@ -92,7 +96,7 @@ class Api::V1::ArticlesControllerTest < ActionController::TestCase
   test "should return json errors when publishing incomplete article" do
     article = @unpublished_articles.first
     assert_no_difference '@user_with_unpublished_articles.published_articles.count' do
-      post_as @user_with_unpublished_articles, :publish, id: article
+      post_as @user_with_unpublished_articles, :publish, params: { id: article }
     end
     validate_response json_response[:errors], /base/, /Article cannot be published without an associated timestamp/
 

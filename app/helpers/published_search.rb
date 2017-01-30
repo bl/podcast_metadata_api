@@ -18,13 +18,13 @@ class PublishedSearch
     if params[:published_before].present?
       # TODO: remove conversion below once using StrictParameters
       published_before = to_datetime(params[:published_before])
-      @resources = @resources.greater_or_equal_to_published_at(published_before)
+      @resources = @resources.less_or_equal_to_published_at(published_before)
     end
 
     if params[:published_after].present?
       # TODO: remove conversion below once using StrictParameters
       published_after = to_datetime(params[:published_after])
-      @resources = @resources.less_or_equal_to_published_at(published_after)
+      @resources = @resources.greater_or_equal_to_published_at(published_after)
     end
 
     @resources

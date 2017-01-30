@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   include ActionController::Serialization
 
   def current_user
-    @current_user ||= User.find_by auth_token: request.headers['Authorization']
+    @current_user ||= User.find_by auth_token: request.headers['HTTP_AUTHORIZATION']
   end
 
   def current_user?(user)

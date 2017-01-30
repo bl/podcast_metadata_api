@@ -53,7 +53,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   # SHOW
 
   test "should return valid json on timestamp get" do
-    get :show, id: @timestamps.first
+    get :show, params: { id: @timestamps.first }
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
     assert_equal @timestamps.first.id, timestamp_response[:id].to_i
@@ -64,7 +64,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   # INDEX
 
   test "index should return empty timestamps list with invalid podcast_id param" do
-    get :index, {podcast_id: -1 }
+    get :index, params: { podcast_id: -1 }
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
     assert_equal 0, timestamp_response.count
@@ -73,7 +73,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   end
 
   test "index should return podcast timestamps with podcast_id param" do
-    get :index, {podcast_id: @podcast_with_timestamps.id }
+    get :index, params: { podcast_id: @podcast_with_timestamps.id }
     timestamp_response = json_response[:data]
     assert_not_nil timestamp_response
     assert_equal @timestamps.count, timestamp_response.count
@@ -89,7 +89,7 @@ class Api::V1::TimestampsControllerTest < ActionController::TestCase
   test "create should return json errors on non-logged in users podcast" do
     valid_timestamp_attributes = { start_time: 5, end_time: 10 }
     assert_no_difference '@podcast.timestamps.count' do
-      post_as @podcast_with_timestamps.series.user, :create, podcast_id: @podcast, timestamp: valid_timestamp_attributes
+      post_as @podcast_with_timestamps.series.user, :create, params: { podcast_id: @podcast, timestamp: valid_timestamp_attributes }
     end
     validate_response json_response[:errors], /podcast/, /is invalid/
 

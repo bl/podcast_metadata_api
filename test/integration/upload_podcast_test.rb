@@ -21,12 +21,11 @@ class UploadPodcastTest < ActionDispatch::IntegrationTest
       data: podcast_file
     }
 
-    post api_podcast_uploads_path(@podcast), { upload: upload_params }, headers_for(@user)
+    post api_podcast_uploads_path(@podcast), params: { upload: upload_params }, headers: headers_for(@user)
     assert_response :created
     upload = json_response
 
-    patch api_upload_path(upload[:data][:id]), { upload: chunk_params }, headers_for(@user)
-    binding.pry
+    patch api_upload_path(upload[:data][:id]), params: { upload: chunk_params }, headers: headers_for(@user)
     assert_response :ok
     upload = json_response
 

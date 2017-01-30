@@ -6,14 +6,14 @@ module PublishedControllerTest
   # SHOW
 
   test "get should return json errors on unowned unpublished resource id" do
-    get_as user, :show, id: unpublished_resource
+    get_as user, :show, params: { id: unpublished_resource }
     validate_response json_response[:errors], resource_name, /is invalid/
 
     assert_response 422
   end
 
   test "get should return valid json on owned unpublished resource id" do
-    get_as user_with_unpublished_resources, :show, id: unpublished_resource
+    get_as user_with_unpublished_resources, :show, params: { id: unpublished_resource }
     resource_response = json_response[:data]
     assert_not_nil resource_response
     assert_equal  unpublished_resource.id, resource_response[:id].to_i
@@ -22,7 +22,7 @@ module PublishedControllerTest
   end
 
   test "get should return valid json on published resource id" do
-    get :show, id: resource
+    get :show, params: { id: resource }
     resource_response = json_response[:data]
     assert_not_nil resource_response
     assert_equal  resource.id, resource_response[:id].to_i
@@ -50,7 +50,7 @@ module PublishedControllerTest
   end
 
   test "index should return all un/published user resources on valid owner id and logged in user" do
-    get_as user_with_resources, :index, valid_index_params
+    get_as user_with_resources, :index, params: valid_index_params
     resources = resources_for user_with_resources
     resources_response = json_response[:data]
     assert_not_nil resources_response
@@ -64,7 +64,7 @@ module PublishedControllerTest
   end
 
   test "index should return published resources on published flag valid owner id and logged in user" do
-    get_as user_with_resources, :index, valid_index_params.merge(published: true)
+    get_as user_with_resources, :index, params: valid_index_params.merge(published: true)
     published_resources = published_resources_for user_with_resources
     resources_response = json_response[:data]
     assert_not_nil resources_response
@@ -78,7 +78,7 @@ module PublishedControllerTest
   end
 
   test "index should return published user resources on valid owner id and logged in non-owner" do
-    get_as user, :index, valid_index_params
+    get_as user, :index, params: valid_index_params
     published_resources = published_resources_for user_with_resources
     resources_response = json_response[:data]
     assert_not_nil resources_response
@@ -92,7 +92,7 @@ module PublishedControllerTest
   end
 
   test "index should ignore published flag with user resources on valid owner id and logged in non-owner" do
-    get_as user, :index, valid_index_params.merge(published: false)
+    get_as user, :index, params: valid_index_params.merge(published: false)
     published_resources = published_resources_for user_with_resources
     resources_response = json_response[:data]
     assert_not_nil resources_response
@@ -106,7 +106,7 @@ module PublishedControllerTest
   end
 
   test "index should return published user resources on valid owner id" do
-    get :index, valid_index_params
+    get :index, params: valid_index_params
     published_resources = published_resources_for user_with_resources
     resources_response = json_response[:data]
     assert_not_nil resources_response
@@ -123,25 +123,24 @@ module PublishedControllerTest
   # searching with another form of ordering
 
   test "should return resources published after time" do
-    get :index, { published_after: resource.published_at }
+    get :index, params: { published_after: resource.published_at }
     assert_response 200
     resources_response = json_response[:data]
     assert_not_predicate resources_response, :empty?
     # verify all resources are ordered on/after given time (using default published-by ordering)
     resources_response.each do |resource_res|
-      binding.pry
       assert resource.published_at <= DateTime.parse(resource_res[:attributes][:"published-at"])
     end
   end
 
   test "should return resources published before time" do
-    get :index, { published_before: resource.published_at }
+    get :index, params: { published_before: resource.published_at }
     assert_response 200
     resources_response = json_response[:data]
     assert_not_nil resources_response
     # verify all resources are ordered on/after given time (using default published-by ordering)
     resources_response.each do |resource_res|
-      assert resource.published_at >= Time.new(resource_res[:attributes][:"published-at"])
+      assert resource.published_at >= DateTime.parse(resource_res[:attributes][:"published-at"])
     end
   end
 
@@ -152,7 +151,7 @@ module PublishedControllerTest
     prepare_resource_publish resource_to_publish if defined? prepare_resource_publish
     published_resources = published_resources_for user_with_unpublished_resources
     assert_no_difference 'published_resources.count' do
-      post :publish, id: resource_to_publish
+      post :publish, params: { id: resource_to_publish }
     end
     validate_response json_response[:errors], /user/, /not authenticated/
 
@@ -164,7 +163,7 @@ module PublishedControllerTest
     prepare_resource_publish resource_to_publish if defined? prepare_resource_publish
     published_resources = published_resources_for user_with_unpublished_resources
     assert_no_difference 'published_resources.count' do
-      post_as user, :publish, id: resource_to_publish
+      post_as user, :publish, params: { id: resource_to_publish }
     end
     validate_response json_response[:errors], resource_name, /is invalid/
 
@@ -172,7 +171,7 @@ module PublishedControllerTest
   end
 
   test "should return json errors when publishing already published resource" do
-    post_as user_with_resources, :publish, id: resource
+    post_as user_with_resources, :publish, params: { id: resource }
     validate_response json_response[:errors], resource_name, /is already published/
 
     assert_response 422
@@ -183,7 +182,7 @@ module PublishedControllerTest
     prepare_resource_publish resource_to_publish if defined? prepare_resource_publish
     published_resources = published_resources_for user_with_unpublished_resources
     assert_difference 'published_resources.count', 1 do
-      post_as user_with_unpublished_resources, :publish, id: resource_to_publish
+      post_as user_with_unpublished_resources, :publish, params: { id: resource_to_publish }
     end
     resource_response = json_response[:data]
     assert_not_nil resource_response
@@ -198,7 +197,7 @@ module PublishedControllerTest
   test "unpublish should return json errors when not authenticated" do
     published_resources = published_resources_for user_with_resources
     assert_no_difference 'published_resources.count' do
-      delete :unpublish, id: resource
+      delete :unpublish, params: { id: resource }
     end
     validate_response json_response[:errors], /user/, /not authenticated/
 
@@ -208,7 +207,7 @@ module PublishedControllerTest
   test "should return json errors when unpublish non-authenticated users resource" do
     published_resources = published_resources_for user_with_resources
     assert_no_difference 'published_resources.count' do
-      delete_as user, :unpublish, id: resource
+      delete_as user, :unpublish, params: { id: resource }
     end
     validate_response json_response[:errors], resource_name, /is invalid/
 
@@ -216,7 +215,7 @@ module PublishedControllerTest
   end
 
   test "should return json errors when unpublishing an unpublished resource" do
-    delete_as user_with_unpublished_resources, :unpublish, id: unpublished_resource
+    delete_as user_with_unpublished_resources, :unpublish, params: { id: unpublished_resource }
     validate_response json_response[:errors], resource_name, /is already unpublished/
 
     assert_response 422
@@ -228,7 +227,7 @@ module PublishedControllerTest
     resource_to_unpublish = resource
     published_resources = published_resources_for user_with_resources
     assert_difference 'published_resources.count', -1 do
-      delete_as user_with_resources, :unpublish, id: resource_to_unpublish
+      delete_as user_with_resources, :unpublish, params: { id: resource_to_unpublish }
     end
     resource_response = json_response[:data]
     assert_not_nil resource_response

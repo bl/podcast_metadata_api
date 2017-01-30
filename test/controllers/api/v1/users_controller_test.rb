@@ -16,7 +16,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   # SHOW
 
   test "should return valid json on user get" do
-    get :show, id: @user
+    get :show, params: { id: @user }
     user_response = json_response[:data]
     assert_not_nil user_response
     assert @user.id, user_response[:attributes][:id]
@@ -26,7 +26,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   end
 
   test "should return json errors on invalid user id get" do
-    get :show, id: -1
+    get :show, params: { id: -1 }
     validate_response json_response[:errors], /user/, /is invalid/
 
     assert_response 422
@@ -35,14 +35,14 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "should return json errors on non activated user id get" do
     # create non-activated user
     non_activated_user = FactoryGirl.create :user
-    get :show, id: non_activated_user
+    get :show, params: { id: non_activated_user }
     validate_response json_response[:errors], /user/, /is invalid/
 
     assert_response 422
   end
 
   test "should return user json and series relationship on valid user get" do
-    get :show, id: @user_with_series
+    get :show, params: { id: @user_with_series }
     user_response = json_response[:data]
     assert_not_nil user_response
     user_series_response = user_response[:relationships][:series][:data]
@@ -72,7 +72,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
                                 password:              "password",
                                 password_confirmation: "password" }
     assert_no_difference 'User.count' do
-      post :create, user: invalid_user_attributes
+      post :create, params: { user: invalid_user_attributes }
     end
     validate_response json_response[:errors], /email/, /is invalid/
     
@@ -83,7 +83,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     valid_user_attributes = FactoryGirl.attributes_for :user
     assert_difference 'User.count', 1 do
       perform_enqueued_jobs do
-        post :create, user: valid_user_attributes
+        post :create, params: { user: valid_user_attributes }
         activation_email = ActionMailer::Base.deliveries.last
         assert_match CGI::escape(valid_user_attributes[:email]), activation_email.body.encoded
       end
@@ -97,7 +97,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "update should return authorization error when not logged in" do
     update_user_attributes = { name: "New Name" }
-    patch :update, id: @user, user: update_user_attributes
+    patch :update, params: { id: @user, user: update_user_attributes }
     validate_response json_response[:errors], /user/, /not authenticated/
     
     assert_response :unauthorized
@@ -105,7 +105,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on invalid user id" do
     update_user_attributes = { email: "new_email@example.com" }
-    patch_as @user, :update, id: -1, user: update_user_attributes
+    patch_as @user, :update, params: { id: -1, user: update_user_attributes }
     validate_response json_response[:errors], /user/, /is invalid/
     
     assert_response 422
@@ -113,7 +113,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on other user id update" do
     update_user_attributes = { email: "new_email@example.com" }
-    patch_as @user, :update, id: @other_user, user: update_user_attributes
+    patch_as @user, :update, params: { id: @other_user, user: update_user_attributes }
     validate_response json_response[:errors], /user/, /is invalid/
     
     assert_response 422
@@ -121,7 +121,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return valid json on valid user update" do
     update_user_attributes = { name: "New Name", email: "new_email@example.com" }
-    patch_as @user, :update, id: @user, user: update_user_attributes
+    patch_as @user, :update, params: { id: @user, user: update_user_attributes }
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload
@@ -135,7 +135,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   test "should return valid json on valid user password update" do
     new_password = "123456"
     update_user_attributes = { password: new_password, password_confirmation: new_password }
-    patch_as @user, :update, id: @user, user: update_user_attributes
+    patch_as @user, :update, params: { id: @user, user: update_user_attributes }
     user_response = json_response[:data]
     assert_not_nil user_response
     @user.reload
@@ -149,7 +149,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "destroy should return authorization error when not logged in" do
     assert_no_difference 'User.count' do
-      delete :destroy, id: @user
+      delete :destroy, params: { id: @user }
     end
     validate_response json_response[:errors], /user/, /not authenticated/
     
@@ -158,7 +158,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on invalid user id destroy" do
     assert_no_difference 'User.count' do
-      delete_as @user, :destroy, id: -1
+      delete_as @user, :destroy, params: { id: -1 }
     end
     validate_response json_response[:errors], /user/, /is invalid/
     
@@ -167,7 +167,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "should return json errors on other user id destroy" do
     assert_no_difference 'User.count' do
-      delete_as @user, :destroy, id: @other_user
+      delete_as @user, :destroy, params: { id: @other_user }
     end
     user_errors = json_response[:errors]
     assert_not_nil user_errors
@@ -179,7 +179,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
   
   test "should return empty payload on valid user destroy" do
     assert_difference 'User.count', -1 do
-      delete_as @user, :destroy, id: @user
+      delete_as @user, :destroy, params: { id: @user }
     end
     assert_empty response.body
     
@@ -188,7 +188,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "destroy should destroy all dependent series" do
     assert_difference 'User.count', -1 do
-      delete_as @user_with_series, :destroy, id: @user_with_series
+      delete_as @user_with_series, :destroy, params: { id: @user_with_series }
     end
 
     assert_empty @user_with_series.series
@@ -200,7 +200,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     user_with_articles = FactoryGirl.create :user_with_unpublished_articles
     articles = user_with_articles.articles
     assert_difference 'User.count', -1 do
-      delete_as user_with_articles, :destroy, id: user_with_articles
+      delete_as user_with_articles, :destroy, params: { id: user_with_articles }
     end
 
     assert_empty articles

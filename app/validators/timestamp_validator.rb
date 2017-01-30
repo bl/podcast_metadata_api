@@ -15,7 +15,7 @@ class TimestampValidator < ActiveModel::Validator
     if record.podcast
       times.each do |time|
         if record.send("#{time}_time") >= record.podcast.end_time
-          record.errors["#{time}_time"] = "must be within podcast length"
+          record.errors.add("#{time}_time", "must be within podcast length")
         end
       end
     end

@@ -34,7 +34,18 @@ class PodcastTest < ActiveSupport::TestCase
     assert @podcast.valid?
     assert @podcast.end_time.present?
     assert @podcast.bitrate.present?
+  end
 
+  test "podcast_file should be the correct file type" do
+    @podcast.podcast_file = fixture_file_upload('images/rails.png', 'image/png')
+    assert_not @podcast.valid?
+    assert_match /You are not allowed to upload image\/png files/, @podcast.errors[:podcast_file].to_s
+    assert_not @podcast.podcast_file.present?
+    assert_nil @podcast.end_time
+    assert_nil @podcast.bitrate
+  end
+
+  test "podcast_file should verify provided file is valid formatted audio file" do
     @podcast.podcast_file = fixture_file_upload('images/rails.png', 'image/png')
     assert_not @podcast.valid?
     assert_match /is not a valid audio file/, @podcast.errors[:podcast_file].to_s

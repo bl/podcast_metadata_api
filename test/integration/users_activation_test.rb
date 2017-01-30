@@ -6,7 +6,7 @@ class UsersActivationTest < ActionDispatch::IntegrationTest
 
     # create user that is not (yet) activated
     valid_user_attributes = FactoryGirl.attributes_for :user
-    post api_users_path, user: valid_user_attributes
+    post api_users_path, params: { user: valid_user_attributes }
     assert_response 201
 
     # get user created above
@@ -19,7 +19,7 @@ class UsersActivationTest < ActionDispatch::IntegrationTest
     headers = { 'Authorization' => @user.auth_token }
     valid_article_attributes = FactoryGirl.attributes_for :article
     assert_no_difference '@user.articles.count' do
-      post api_articles_path, { article: valid_article_attributes }, headers
+      post api_articles_path, params: { article: valid_article_attributes }, headers: headers
     end
     assert_response 403
     article_errors = json_response[:errors]
@@ -92,7 +92,7 @@ class UsersActivationTest < ActionDispatch::IntegrationTest
     assert_match /is invalid/, activations_errors.first.to_s
   end
 
-  test "user registers and acivates account with valid activation token and email" do
+  test "user registers and activates account with valid activation token and email" do
     # NOTE: it appears that the following forms are BOTH valid
     # get edit_api_account_activation_path(@user.activation_token), { email: @user.email }
     # get edit_api_account_activation_path(@user.activation_token, email: @user.email)
@@ -110,7 +110,7 @@ class UsersActivationTest < ActionDispatch::IntegrationTest
     headers = { 'Authorization' => @user.auth_token }
     valid_article_attributes = FactoryGirl.attributes_for :article
     assert_difference '@user.articles.count', 1 do
-      post api_articles_path, { article: valid_article_attributes }, headers
+      post api_articles_path, params: { article: valid_article_attributes }, headers: headers
     end
     assert_response 201
     article_response = json_response[:data]

@@ -4,13 +4,13 @@ module LimitedSearchControllerTest
   
   test "should return limit many results if limit less than total" do
     # verify invalid limit field skips limit option
-    get :index, { limit: "invalid-limit" }
+    get :index, params: { limit: "invalid-limit" }
     assert_response 200
     resources_response = json_response[:data]
     assert_not_nil resources_response
     assert_equal all_published_resources.count, resources_response.count
 
-    get :index, { limit: 4 }
+    get :index, params: { limit: 4 }
     assert_response 200
     resources_response = json_response[:data]
     assert_not_nil resources_response

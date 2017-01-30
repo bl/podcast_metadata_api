@@ -89,7 +89,7 @@ class Podcast < ActiveRecord::Base
   def initialize_metadata
     TagLib::FileRef.open(self.podcast_file.current_path) do |file|
       if file.null?
-        self.errors[:podcast_file] = "is not a valid audio file"
+        self.errors.add(:podcast_file, "is not a valid audio file")
         remove_podcast_file!
         assign_attributes(end_time: nil, bitrate: nil)
       else
@@ -105,7 +105,7 @@ class Podcast < ActiveRecord::Base
 
   def publishable
     if published? && !podcast_file.present?
-      self.errors[:base] = "Podcast cannot be published without an associated podcast file"
+      self.errors.add(:base, "Podcast cannot be published without an associated podcast file")
     end
   end
 end

@@ -28,7 +28,7 @@ class ActiveSupport::TestCase
   end
 
   # add JSON mime type to request headers
-  def api_response_format(format = Mime::JSON)
+  def api_response_format(format = Mime[:json])
     request.headers['Accept'] = "#{request.headers['Accept']},#{format}"
     request.headers['Content-Type'] = format.to_s
   end
@@ -48,12 +48,12 @@ class ActiveSupport::TestCase
   end
 
   # create published article on article_user to podcast
-  def create_published_article(podcast, article_user)
+  def create_published_article(podcast, article_user, publish_options = {})
     article = article_user.articles.create(FactoryGirl.attributes_for :article)
     create_article_timestamp(podcast, article)
     # publish article
     #article.update published: true, published_at: Time.zone.now
-    ResourcePublisher.new(article).publish
+    ResourcePublisher.new(article, publish_options).publish
 
     article
   end

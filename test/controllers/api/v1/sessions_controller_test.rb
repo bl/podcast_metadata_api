@@ -12,7 +12,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
   test "should return json errors on invalid user login" do
     invalid_login_attributes = { email:     "invalid_email.com",
                                  password:  "password" }
-    post :create, session: invalid_login_attributes
+    post :create, params: { session: invalid_login_attributes }
     session_response = json_response[:errors]
     assert_not_nil session_response
     assert_match /email_password/, session_response.first[:id].to_s
@@ -24,7 +24,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
   test "should return json errors on login on non activated user" do
     valid_login_attributes = { email:     @non_activated_user.email,
                                password:  "password" }
-    post :create, session: valid_login_attributes
+    post :create, params: { session: valid_login_attributes }
     session_response = json_response[:errors]
     assert_not_nil session_response
     assert_match /user/, session_response.first[:id].to_s
@@ -36,7 +36,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
   test "should return valid json on valid user login" do
     valid_login_attributes = { email:     @user.email,
                                password:  "password" }
-    post :create, session: valid_login_attributes
+    post :create, params: { session: valid_login_attributes }
     session_response = json_response[:data]
     assert_not_nil session_response
     assert_not_equal @user.auth_token, @user.reload.auth_token
@@ -50,7 +50,7 @@ class Api::V1::SessionsControllerTest < ActionController::TestCase
   test "should return header with success status on valid destroy" do
     # verify auth_token is created right after creation
     assert_not_nil @user.auth_token
-    delete :destroy, id: @user.auth_token
+    delete :destroy, params: { id: @user.auth_token }
     assert_empty response.body
     assert_nil @user.reload.auth_token
 

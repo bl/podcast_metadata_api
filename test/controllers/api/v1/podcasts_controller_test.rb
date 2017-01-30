@@ -103,7 +103,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   # INDEX
 
   test "should return valid json user podcats on user_id param" do
-    get :index, { user_id: @user_with_podcasts.id }
+    get :index, params: { user_id: @user_with_podcasts.id }
     podcasts = @user_with_podcasts.podcasts
     podcasts_response = json_response[:data]
     assert_not_nil podcasts_response
@@ -123,7 +123,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
       podcast_attributes[:title] = "Search Pattern Matched ##{i}"
       podcast_ids.push @podcasts.create(podcast_attributes).id
     end
-    get :index, { title: "search pattern matched" }
+    get :index, params: { title: "search pattern matched" }
     podcasts_response = json_response[:data]
     assert_not_nil podcasts_response
     assert_equal podcast_ids.count, podcasts_response.count
@@ -139,29 +139,29 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   # TODO: add test to verify receiving unpublished podcast when getting as owner
 
   test "should return published podcasts filtered by above end_time length" do
-    get :index, { min_end_time: 86 }
+    get :index, params: { min_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.where(published: true).count, podcasts_response.count
-    get :index, { min_end_time: 87 }
+    get :index, params: { min_end_time: 87 }
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
 
   test "should return published podcasts filtered by below end_time length" do
-    get :index, { max_end_time: 86 }
+    get :index, params: { max_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.where(published: true).count, podcasts_response.count
-    get :index, { max_end_time: 85 }
+    get :index, params: { max_end_time: 85 }
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
 
   #TODO: add aditinal podcasts with different endimes for more through testing
   test "should return valid json filtered by multiple filters" do 
-    get :index, { min_end_time: 86, max_end_time: 86 }
+    get :index, params: { min_end_time: 86, max_end_time: 86 }
     podcasts_response = json_response[:data]
     assert_equal Podcast.where(published: true).count, podcasts_response.count
-    get :index, { min_end_time: 87, max_end_time: 89}
+    get :index, params: { min_end_time: 87, max_end_time: 89}
     podcasts_response = json_response[:data]
     assert_equal 0, podcasts_response.count
   end
@@ -169,7 +169,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   test "should return results filtered by series when both user_id and series_id is provided" do
     # NOTE: user has 3 podcasts, first series has 2
     series = @user_with_podcasts.series
-    get :index, { series_id: series.first.id, user_id: @user_with_podcasts.id }
+    get :index, params: { series_id: series.first.id, user_id: @user_with_podcasts.id }
     assert_response 200
     podcasts_response = json_response[:data]
     assert_not_nil podcasts_response
@@ -190,7 +190,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('piano-loop.mp3') }
     assert_no_difference '@series.podcasts.count' do
-      post_as @user, :create, series_id: -1, podcast: valid_podcast_attributes
+      post_as @user, :create, params: { series_id: -1, podcast: valid_podcast_attributes }
     end
     validate_response json_response[:errors], /series/, /is invalid/
 
@@ -201,7 +201,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  podcast_file: open_podcast_file('piano-loop.mp3') }
     assert_difference '@series.podcasts.count', 1 do
-      post_as @user, :create, series_id: @series, podcast: valid_podcast_attributes
+      post_as @user, :create, params: { series_id: @series, podcast: valid_podcast_attributes }
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -214,7 +214,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     valid_podcast_attributes = { title: "New Podcast Name",
                                  remote_podcast_file_url: "https://s3.amazonaws.com/podcastformetest/piano-loop.mp3" }
     assert_difference '@series.podcasts.count', 1 do
-      post_as @user, :create, series_id: @series, podcast: valid_podcast_attributes
+      post_as @user, :create, params: { series_id: @series, podcast: valid_podcast_attributes }
     end
     podcast_response = json_response[:data]
     assert_not_nil podcast_response
@@ -229,7 +229,7 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
     timestamps = @podcasts.first.timestamps
     timestamps.create (FactoryGirl.attributes_for :timestamp, podcast_end_time: @podcasts.first.end_time)
     assert_difference '@podcasts.count', -1 do
-      delete_as @user_with_podcasts, :destroy, id: @podcasts.first
+      delete_as @user_with_podcasts, :destroy, params: { id: @podcasts.first }
     end
     assert_empty response.body
 

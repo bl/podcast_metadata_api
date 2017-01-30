@@ -9,7 +9,7 @@ module PaginatedControllerTest
       params = { limit: 3 }
       params.merge! offset: resources_response.count if resources_response.count > 0
 
-      get :index, params
+      get :index, params: params
       res = json_response[:data]
       assert_not_nil res
 

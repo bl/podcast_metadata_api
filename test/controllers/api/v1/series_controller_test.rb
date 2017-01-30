@@ -79,7 +79,7 @@ class Api::V1::SeriesControllerTest < ActionController::TestCase
   test "destroy should destroy all series dependent podcasts" do
     podcasts = @series.first.podcasts
     assert_difference 'Series.count', -1 do
-      delete_as @user_with_series, :destroy, id: @series.first
+      delete_as @user_with_series, :destroy, params: { id: @series.first }
     end
 
     assert_empty podcasts

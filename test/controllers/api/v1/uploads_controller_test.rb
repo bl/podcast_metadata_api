@@ -28,14 +28,14 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
   # SHOW
 
   test "#show should return json errors on invalid upload id" do
-    get_as @user, :show, id: -1
+    get_as @user, :show, params: { id: -1 }
     validate_response json_response[:errors], /upload/, /is invalid/
 
     assert_response :unprocessable_entity
   end
 
   test "#show should return valid json upload on id param" do
-    get_as @user, :show, id: @upload
+    get_as @user, :show, params: { id: @upload }
     upload_response = json_response[:data]
     assert_not_nil upload_response
     assert_equal @upload.id, upload_response[:id].to_i
@@ -47,7 +47,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "create should return json errors when not logged in" do
     assert_no_difference 'Upload.count' do
-      post :create, podcast_id: @subject, upload: valid_post_params
+      post :create, params: { podcast_id: @subject, upload: valid_post_params }
     end
     validate_response json_response[:errors], /user/, /not authenticated/
 
@@ -57,7 +57,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
   test "create should only add upload to associated subjects uploads" do
     before_create_count = @subject.uploads.count
     assert_no_difference '@other_subject.uploads.count' do
-      post_as @user, :create, podcast_id: @subject, upload: valid_post_params
+      post_as @user, :create, params: { podcast_id: @subject, upload: valid_post_params }
     end
     upload_response = json_response[:data]
     assert_not_nil upload_response
@@ -68,14 +68,14 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "#create should return json errors when subjects user is not current user" do
     assert_no_difference '@subject.uploads.count' do
-      post_as @other_user, :create, podcast_id: @subject, upload: valid_post_params
+      post_as @other_user, :create, params: { podcast_id: @subject, upload: valid_post_params }
     end
     validate_response json_response[:errors], /podcast/, /is invalid/
   end
 
   test "create should return json errors on invalid attributes" do
     assert_no_difference '@subject.uploads.count' do
-      post_as @user, :create, podcast_id: @subject, upload: invalid_post_params
+      post_as @user, :create, params: { podcast_id: @subject, upload: invalid_post_params }
     end
     validate_response json_response[:errors], /total_size/, /must be greater than 0/
 
@@ -84,7 +84,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "create should return valid json on valid attributes" do
     assert_difference '@subject.uploads.count', 1 do
-      post_as @user, :create, podcast_id: @subject, upload: valid_post_params
+      post_as @user, :create, params: { podcast_id: @subject, upload: valid_post_params }
     end
     upload_response = json_response[:data]
     assert_not_nil upload_response
@@ -97,21 +97,21 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
   # UPDATE
 
   test "update should return json errors when not logged-in" do
-    patch :update, id: @upload, upload: valid_post_params
+    patch :update, params: { id: @upload, upload: valid_post_params }
     validate_response json_response[:errors], /user/, /not authenticated/
 
     assert_response :unauthorized
   end
 
   test "should return json errors when updating non-logged users resource" do
-    patch_as @other_user, :update, id: @upload, upload: valid_post_params
+    patch_as @other_user, :update, params: { id: @upload, upload: valid_post_params }
     validate_response json_response[:errors], /upload/, /is invalid/
 
     assert_response :unprocessable_entity
   end
 
   test "update should return json errors when using invalid resource id" do
-    patch_as @user, :update, id: -1, upload: valid_post_params
+    patch_as @user, :update, params: { id: -1, upload: valid_post_params }
     validate_response json_response[:errors], /upload/, /is invalid/
 
     assert_response :unprocessable_entity
@@ -120,28 +120,28 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
   test "#update should return json errors when provided chunk size is incorrect" do
     @partial_upload.update(chunk_size: 10)
 
-    patch_as @partial_user, :update, id: @partial_upload, upload: valid_chunk_params
+    patch_as @partial_user, :update, params: { id: @partial_upload, upload: valid_chunk_params }
     validate_response json_response[:errors], /chunk/, /is incorrect size. Use provided upload chunk size/
 
     assert_response :unprocessable_entity
   end
 
   test "#update should return json errors when upload is already finished" do
-    patch_as @user, :update, id: @upload, upload: valid_chunk_params
+    patch_as @user, :update, params: { id: @upload, upload: valid_chunk_params }
     validate_response json_response[:errors], /upload/, /has already been completed/
 
     assert_response :unprocessable_entity
   end
 
   test "#update should return json errors when chunk is not present" do
-    patch_as @empty_user, :update, id: @empty_upload, upload: { data: '' }
+    patch_as @empty_user, :update, params: { id: @empty_upload, upload: { data: '' } }
     validate_response json_response[:errors], /chunk/, /is not present/
 
     assert_response :unprocessable_entity
   end
 
   test "#update should return valid json after successful chunk upload" do
-    patch_as @empty_user, :update, id: @empty_upload, upload: valid_chunk_params
+    patch_as @empty_user, :update, params: { id: @empty_upload, upload: valid_chunk_params }
 
     upload_response = json_response[:data]
     assert_not_nil upload_response
@@ -152,7 +152,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
     @empty_upload.subject.remove_podcast_file!
     @empty_upload.update(chunk_size: valid_completed_chunk_params[:data].size)
 
-    patch_as @empty_user, :update, id: @empty_upload, upload: valid_completed_chunk_params
+    patch_as @empty_user, :update, params: { id: @empty_upload, upload: valid_completed_chunk_params }
 
     upload_response = json_response[:data]
     assert_not_nil upload_response
@@ -164,7 +164,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "destroy should return authorization error when not logged in" do
     assert_no_difference 'Upload.count' do
-      delete :destroy, id: @upload
+      delete :destroy, params: { id: @upload }
     end
     validate_response json_response[:errors], /user/, /not authenticated/
 
@@ -173,7 +173,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "destroy should return json errors on invalid upload id" do
     assert_no_difference 'Upload.count' do
-      delete_as @user, :destroy, id: -1
+      delete_as @user, :destroy, params: { id: -1 }
     end
     validate_response json_response[:errors], /upload/, /is invalid/
 
@@ -182,7 +182,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
 
   test "destroy should return json errors on deleting non-logged in users upload" do
     assert_no_difference 'Upload.count' do
-      delete_as @other_user, :destroy, id: @upload
+      delete_as @other_user, :destroy, params: { id: @upload }
     end
     validate_response json_response[:errors], /upload/, /is invalid/
 
@@ -192,7 +192,7 @@ class Api::V1::UploadsControllerTest < ActionController::TestCase
   test "destroy should return empty payload on valid upload" do
     upload_file_dir = @upload.file_dir
     assert_difference 'Upload.count', -1 do
-      delete_as @user, :destroy, id: @upload
+      delete_as @user, :destroy, params: { id: @upload }
     end
     assert_empty response.body
     refute File.exist?(upload_file_dir)
