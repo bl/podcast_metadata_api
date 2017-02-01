@@ -9,35 +9,18 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
   def setup
     # create additional data
     2.times do
-      misc_user = FactoryGirl.create :user_with_series
-      misc_series = misc_user.series
-      misc_series.each do |series|
-        2.times do
-          series.podcasts.create(FactoryGirl.attributes_for :published_podcast)
-        end
-      end
+      FactoryGirl.create :user_with_published_podcasts
     end
     # user with empty series
     @user = (FactoryGirl.create :user_with_series, series_count: 1)
     @series = @user.series.first
+
     # user with series containing published podcasts (3 in first series, 1 in second series)
-    @user_with_podcasts = FactoryGirl.create(:user_with_series, series_count: 3)
-    series_with_podcasts = @user_with_podcasts.series.first
-    3.times do
-        series_with_podcasts.podcasts.create (FactoryGirl.attributes_for :published_podcast)
-    end
-    @user_with_podcasts.series.second.podcasts.create (FactoryGirl.attributes_for :published_podcast)
-    @podcasts = series_with_podcasts.podcasts
-    include_default_accept_headers
+    @user_with_podcasts = FactoryGirl.create :user_with_published_podcasts
+    @podcasts = @user_with_podcasts.series.first.podcasts
 
     # user with series containing unpublished podcasts (3 in first series, 1 in second series)
-    @user_with_unpublished_podcasts = FactoryGirl.create(:user_with_series, series_count: 3)
-    series_with_unpublished_podcasts = @user_with_unpublished_podcasts.series.first
-    3.times do
-        series_with_unpublished_podcasts.podcasts.create (FactoryGirl.attributes_for :podcast)
-    end
-    @user_with_unpublished_podcasts.series.second.podcasts.create (FactoryGirl.attributes_for :podcast)
-    #@unpublished_podcasts = series_with_podcasts.podcasts
+    @user_with_unpublished_podcasts = FactoryGirl.create(:user_with_unpublished_podcasts, series_count: 3)
     include_default_accept_headers
   end
 
