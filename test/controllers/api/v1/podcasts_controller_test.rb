@@ -194,6 +194,10 @@ class Api::V1::PodcastsControllerTest < ActionController::TestCase
 
   # TODO: run generic resource tests on multiple valid_attributes
   test "create should return valid json on valid attributes with remote auio file" do
+    podcast_file = File.open('test/fixtures/podcasts/piano-loop.mp3')
+    stub_request(:get, "https://s3.amazonaws.com/podcastformetest/piano-loop.mp3")
+      .to_return(body: podcast_file)
+
     valid_podcast_attributes = { title: "New Podcast Name",
                                  remote_podcast_file_url: "https://s3.amazonaws.com/podcastformetest/piano-loop.mp3" }
     assert_difference '@series.podcasts.count', 1 do

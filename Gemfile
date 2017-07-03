@@ -48,6 +48,8 @@ group :development, :test do
   gem 'factory_girl_rails'
   # Used for generating fake date
   gem 'ffaker'
+  # stub web requests
+  gem 'webmock'
 end
 
 group :development do
