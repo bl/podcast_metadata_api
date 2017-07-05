@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -20,10 +19,9 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "created_at",                   null: false
     t.datetime "updated_at",                   null: false
     t.datetime "published_at"
+    t.index ["author_id"], name: "index_articles_on_author_id"
+    t.index ["published_at"], name: "index_articles_on_published_at"
   end
-
-  add_index "articles", ["author_id"], name: "index_articles_on_author_id"
-  add_index "articles", ["published_at"], name: "index_articles_on_published_at"
 
   create_table "podcasts", force: :cascade do |t|
     t.string   "title"
@@ -35,13 +33,12 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "updated_at",                   null: false
     t.integer  "series_id"
     t.datetime "published_at"
+    t.index ["published_at"], name: "index_podcasts_on_published_at"
+    t.index ["series_id"], name: "index_podcasts_on_series_id"
+    t.index ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
+    t.index ["title", "published_at"], name: "index_podcasts_on_title_and_published_at"
+    t.index ["title"], name: "index_podcasts_on_title"
   end
-
-  add_index "podcasts", ["published_at"], name: "index_podcasts_on_published_at"
-  add_index "podcasts", ["series_id"], name: "index_podcasts_on_series_id"
-  add_index "podcasts", ["title", "created_at"], name: "index_podcasts_on_title_and_created_at"
-  add_index "podcasts", ["title", "published_at"], name: "index_podcasts_on_title_and_published_at"
-  add_index "podcasts", ["title"], name: "index_podcasts_on_title"
 
   create_table "series", force: :cascade do |t|
     t.string   "title"
@@ -51,10 +48,9 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "updated_at",                   null: false
     t.text     "description"
     t.datetime "published_at"
+    t.index ["published_at"], name: "index_series_on_published_at"
+    t.index ["user_id"], name: "index_series_on_user_id"
   end
-
-  add_index "series", ["published_at"], name: "index_series_on_published_at"
-  add_index "series", ["user_id"], name: "index_series_on_user_id"
 
   create_table "timestamps", force: :cascade do |t|
     t.integer  "start_time"
@@ -63,10 +59,9 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "article_id"
+    t.index ["article_id"], name: "index_timestamps_on_article_id"
+    t.index ["podcast_id"], name: "index_timestamps_on_podcast_id"
   end
-
-  add_index "timestamps", ["article_id"], name: "index_timestamps_on_article_id"
-  add_index "timestamps", ["podcast_id"], name: "index_timestamps_on_podcast_id"
 
   create_table "uploads", force: :cascade do |t|
     t.string   "chunk_id",     null: false
@@ -78,11 +73,10 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
     t.integer  "chunk_size"
+    t.index ["chunk_id"], name: "index_uploads_on_chunk_id", unique: true
+    t.index ["subject_type", "subject_id"], name: "index_uploads_on_subject_type_and_subject_id"
+    t.index ["user_id"], name: "index_uploads_on_user_id"
   end
-
-  add_index "uploads", ["chunk_id"], name: "index_uploads_on_chunk_id", unique: true
-  add_index "uploads", ["subject_type", "subject_id"], name: "index_uploads_on_subject_type_and_subject_id"
-  add_index "uploads", ["user_id"], name: "index_uploads_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
@@ -96,9 +90,8 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.datetime "activated_at"
     t.string   "reset_digest"
     t.datetime "reset_sent_at"
+    t.index ["auth_token"], name: "index_users_on_auth_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
-
-  add_index "users", ["auth_token"], name: "index_users_on_auth_token", unique: true
-  add_index "users", ["email"], name: "index_users_on_email", unique: true
 
 end
