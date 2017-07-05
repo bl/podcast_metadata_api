@@ -24,3 +24,5 @@
 /log/*
 !/log/.keep
 /tmp
+/public/packs
+/node_modules

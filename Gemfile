@@ -36,6 +36,10 @@ gem 'turbolinks'
 gem 'bootstrap-sass'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
+# React.js integration
+gem "react-rails"
+# Webpacker for React.js processing
+gem "webpacker"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

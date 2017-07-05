@@ -48,4 +48,6 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  root to: 'client#show'
 end
