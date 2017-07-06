@@ -107,3 +107,12 @@ $gray-medium-light: #eaeaea;
     border-top: 1px solid #e8e8e8;
   }
 }
+
+/* login */
+.login {
+  display: flex;
+
+  //justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

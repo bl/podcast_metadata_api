@@ -5,5 +5,4 @@ class ClientControllerTest < ActionDispatch::IntegrationTest
     get client_show_url
     assert_response :success
   end
-
 end
