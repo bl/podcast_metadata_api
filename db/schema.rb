@@ -67,8 +67,8 @@ ActiveRecord::Schema.define(version: 20161025221025) do
     t.string   "chunk_id",     null: false
     t.integer  "total_size"
     t.string   "ext"
-    t.integer  "subject_id"
     t.string   "subject_type"
+    t.integer  "subject_id"
     t.integer  "user_id",      null: false
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false

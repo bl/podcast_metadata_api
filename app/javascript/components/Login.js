@@ -1,3 +1,6 @@
+import React from 'react';
+import AuthService from '../utils/AuthService.js';
+
 class Login extends React.Component {
   constructor(props) {
     super(props);
@@ -19,6 +22,7 @@ class Login extends React.Component {
   }
 
   handleSubmit(event) {
+    AuthService.login();
   }
 
   render() {
@@ -51,3 +55,5 @@ class Login extends React.Component {
     );
   }
 }
+
+export default Login;
